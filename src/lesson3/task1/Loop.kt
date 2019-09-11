@@ -313,7 +313,7 @@ fun squareSequenceDigit(n: Int): Int {
     var count = 0
     while (step < n) {
         count += 1
-        if (count*count >= k10 * 10) {
+        if (count * count >= k10 * 10) {
             k += 1
             k10 *= 10
         }
