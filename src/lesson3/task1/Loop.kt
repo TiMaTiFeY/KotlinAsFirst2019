@@ -195,7 +195,8 @@ fun collatzSteps(x: Int): Int {
 fun sin(x: Double, eps: Double): Double {
     var res = 0.0
     var count = 1
-    var num = x % (2 * PI)
+    var num = abs(x) % (2 * PI)
+    if (x < 0) num *= -1
     val sqrX = num * num
     var value = num
     var fact = 1.0
@@ -223,7 +224,8 @@ fun sin(x: Double, eps: Double): Double {
 fun cos(x: Double, eps: Double): Double {
     var res = 0.0
     var count = 0
-    var num = x % (2 * PI)
+    var num = abs(x) % (2 * PI)
+    if (x < 0) num *= -1
     val sqrX = num * num
     num = 1.0
     var value = num
@@ -332,19 +334,23 @@ fun squareSequenceDigit(n: Int): Int {
  * Использовать операции со строками в этой задаче запрещается.
  */
 fun fibSequenceDigit(n: Int): Int {
+    if (n in 1..2) return 1
     var k = 1
     var k10 = 1
-    var step = 0
-    var count = 0
+    var step = 2
+    var a = 1
+    var b = 1
     while (step < n) {
-        count += 1
-        if (fib(count) >= k10 * 10) {
+        val c = a + b
+        a = b
+        b = c
+        if (b >= k10 * 10) {
             k += 1
             k10 *= 10
         }
         step += k
     }
-    var num = fib(count)
+    var num = b
     val dif = step - n
     for (i in 1..dif) num /= 10
     return num % 10
