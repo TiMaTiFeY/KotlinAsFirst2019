@@ -201,7 +201,7 @@ fun sin(x: Double, eps: Double): Double {
     var value = num
     var fact = 1.0
     var mark = 1
-    while (value >= eps) {
+    while (abs(value) >= eps) {
         res += value * mark
         mark *= -1
         count += 2
@@ -231,7 +231,7 @@ fun cos(x: Double, eps: Double): Double {
     var value = num
     var fact = 1.0
     var mark = 1
-    while (value >= eps) {
+    while (abs(value) >= eps) {
         res += value * mark
         mark *= -1
         count += 2
@@ -301,6 +301,7 @@ fun hasDifferentDigits(n: Int): Boolean {
  *
  * Найти n-ю цифру последовательности из квадратов целых чисел:
  * 149162536496481100121144...
+
  * Например, 2-я цифра равна 4, 7-я 5, 12-я 6.
  *
  * Использовать операции со строками в этой задаче запрещается.
@@ -329,6 +330,7 @@ fun squareSequenceDigit(n: Int): Int {
  *
  * Найти n-ю цифру последовательности из чисел Фибоначчи (см. функцию fib выше):
  * 1123581321345589144...
+ * 1123581321345589144233377
  * Например, 2-я цифра равна 1, 9-я 2, 14-я 5.
  *
  * Использовать операции со строками в этой задаче запрещается.
@@ -336,7 +338,7 @@ fun squareSequenceDigit(n: Int): Int {
 fun fibSequenceDigit(n: Int): Int {
     if (n in 1..2) return 1
     var k = 1
-    var k10 = 1
+    var k10 = 1.0
     var step = 2
     var a = 1
     var b = 1
@@ -344,7 +346,7 @@ fun fibSequenceDigit(n: Int): Int {
         val c = a + b
         a = b
         b = c
-        if (b >= k10 * 10) {
+        while (b > k10 * 10) {
             k += 1
             k10 *= 10
         }
