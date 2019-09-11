@@ -69,7 +69,7 @@ fun digitCountInNumber(n: Int, m: Int): Int =
  */
 fun digitNumber(n: Int): Int {
     var count = 0
-    var number = n
+    var number = abs(n)
     do {
         count += 1
         number /= 10
@@ -85,7 +85,16 @@ fun digitNumber(n: Int): Int {
  */
 fun fib(n: Int): Int {
     if (n in 1..2) return 1
-    return fib(n - 1) + fib(n - 2)
+    var a = 1
+    var b = 1
+    var count = 2
+    while (count < n) {
+        count++
+        val c = a + b
+        a = b
+        b = c
+    }
+    return b
 }
 
 /**
@@ -296,7 +305,7 @@ fun hasDifferentDigits(n: Int): Boolean {
  */
 fun squareSequenceDigit(n: Int): Int {
     var k = 1
-    var k10 = 1
+    var k10 = 1.0
     var step = 0
     var count = 0
     while (step < n) {
