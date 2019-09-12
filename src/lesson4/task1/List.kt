@@ -236,6 +236,7 @@ fun factorizeToString(n: Int): String {
 fun convert(n: Int, base: Int): List<Int> {
     var num = n
     val list = mutableListOf<Int>()
+    if (n == 0) return listOf(0)
     while (num > 0) {
         list.add(0, num % base)
         num /= base
@@ -257,6 +258,7 @@ fun convert(n: Int, base: Int): List<Int> {
 fun convertToString(n: Int, base: Int): String {
     val alf = "abcdefghijklmnopqrstuvwxyz"
     var num = n
+    if (n == 0) return "0"
     val list = mutableListOf<Int>()
     while (num > 0) {
         list.add(0, num % base)
@@ -395,6 +397,7 @@ fun russian(n: Int): String {
     num = n / 1000 //part 2
     if (num > 0) {
         list.add(0, when {
+                num % 100 in 11..19 -> "тысяч"
                 num % 10 == 1 -> "тысяча"
                 num % 10 in 2..4 -> "тысячи"
                 else -> "тысяч"
