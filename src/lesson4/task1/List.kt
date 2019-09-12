@@ -356,25 +356,25 @@ fun from10to19(num: Int, digits: List<String>): String {
     return when {
         num % 100 == 10 -> "десять"
         num % 10 == 2 -> "двенадцать"
-        num % 10 in 1..4 -> digits[num % 10 - 1] + "надцать"
+        num % 10 in 1..3 -> digits[num % 10 - 1] + "надцать"
         else -> digits[num % 10 - 1].substring(0, digits[num % 10 - 1].length - 1) + "надцать"
     }
 }
 fun from20to90(num: Int, digits: List<String>): String {
-    return when {
-        num % 100 / 10 in 2..3 -> digits[num % 100 / 10 - 1] + "дцать"
-        num % 100 / 10 == 4 -> "сорок"
-        num % 100 / 10 == 9 -> "девяносто"
-        num % 100 / 10 == 0 -> ""
+    return when (num  % 100 / 10){
+        in 2..3 -> digits[num % 100 / 10 - 1] + "дцать"
+        4 -> "сорок"
+        9 -> "девяносто"
+        0 -> ""
         else -> digits[num % 100 / 10 - 1] + "десят"
     }
 }
 fun from100to900(num: Int, digits: List<String>): String {
-    return when {
-        num / 100 == 1 -> "сто"
-        num / 100 == 2 -> "двести"
-        num / 100 in 3..4 -> digits[num / 100 - 1] + "ста"
-        num / 100 == 0 -> ""
+    return when (num / 100) {
+        1 -> "сто"
+        2 -> "двести"
+        in 3..4 -> digits[num / 100 - 1] + "ста"
+        0 -> ""
         else -> digits[num / 100 - 1] + "сот"
     }
 }
