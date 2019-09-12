@@ -146,9 +146,9 @@ fun center(list: MutableList<Double>): MutableList<Double> {
  * C = a1b1 + a2b2 + ... + aNbN. Произведение пустых векторов считать равным 0.
  */
 fun times(a: List<Int>, b: List<Int>): Int {
-    var C = 0
-    for (i in 0 until a.size) C += a[i] * b[i]
-    return C
+    var res = 0
+    for (i in 0 until a.size) res += a[i] * b[i]
+    return res
 }
 
 /**
@@ -264,7 +264,7 @@ fun convertToString(n: Int, base: Int): String {
         list.add(0, num % base)
         num /= base
     }
-    return list.joinToString (separator = "", transform = { if (it < 10) "$it" else alf[it - 10].toString() })
+    return list.joinToString(separator = "", transform = { if (it < 10) "$it" else alf[it - 10].toString() })
 }
 
 /**
@@ -321,22 +321,25 @@ fun roman(n: Int): String {
     var exc = 0
     while (num > 0) {
         exc++
-        val c = when {
-            exc == 1 -> listOf("I", "V", "X")
-            exc == 2 -> listOf("X", "L", "C")
-            exc == 3 -> listOf("C", "D", "M")
+        val c = when (exc) {
+            1 -> listOf("I", "V", "X")
+            2 -> listOf("X", "L", "C")
+            3 -> listOf("C", "D", "M")
             else -> listOf("M")
         }
         val digit = num % 10
         num /= 10
-        list.add(0, when {
-            exc > 3 -> c[0].repeat(digit)
-            digit in 1..3 -> c[0].repeat(digit)
-            digit in 4..5 -> c[0].repeat(5 - digit) + c[1]
-            digit in 6..8 -> c[1] + c[0].repeat(digit - 5)
-            digit == 9 -> c[0].repeat(10 - digit) + c[2]
-            else -> ""
-        })
+        list.add(
+            0,
+            when {
+                exc > 3 -> c[0].repeat(digit)
+                digit in 1..3 -> c[0].repeat(digit)
+                digit in 4..5 -> c[0].repeat(5 - digit) + c[1]
+                digit in 6..8 -> c[1] + c[0].repeat(digit - 5)
+                digit == 9 -> c[0].repeat(10 - digit) + c[2]
+                else -> ""
+            }
+        )
     }
     return list.joinToString(separator = "")
 }
@@ -349,29 +352,32 @@ fun roman(n: Int): String {
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
 //Вспомогательные функции для этой задачи
-fun from10to19(num: Int, digits: List<String>): String =
-    when {
+fun from10to19(num: Int, digits: List<String>): String {
+    return when {
         num % 100 == 10 -> "десять"
         num % 10 == 2 -> "двенадцать"
         num % 10 in 1..4 -> digits[num % 10 - 1] + "надцать"
         else -> digits[num % 10 - 1].substring(0, digits[num % 10 - 1].length - 1) + "надцать"
     }
-fun from20to90(num: Int, digits: List<String>): String =
-    when {
+}
+fun from20to90(num: Int, digits: List<String>): String {
+    return when {
         num % 100 / 10 in 2..3 -> digits[num % 100 / 10 - 1] + "дцать"
         num % 100 / 10 == 4 -> "сорок"
         num % 100 / 10 == 9 -> "девяносто"
         num % 100 / 10 == 0 -> ""
         else -> digits[num % 100 / 10 - 1] + "десят"
     }
-fun from100to900(num: Int, digits: List<String>): String =
-    when {
+}
+fun from100to900(num: Int, digits: List<String>): String {
+    return when {
         num / 100 == 1 -> "сто"
         num / 100 == 2 -> "двести"
         num / 100 in 3..4 -> digits[num / 100 - 1] + "ста"
         num / 100 == 0 -> ""
         else -> digits[num / 100 - 1] + "сот"
     }
+}
 
 fun russian(n: Int): String {
     val list = mutableListOf<String>()
@@ -380,8 +386,8 @@ fun russian(n: Int): String {
     var exc = 0
     while (exc < 3) {
         exc++
-        when {
-            exc == 1 ->
+        when (exc) {
+            1 ->
                 if (num % 100 in 10..19) {
                     exc++
                     list.add(0, from10to19(num, digits))
@@ -389,38 +395,37 @@ fun russian(n: Int): String {
                     val digit = num % 10
                     list.add(0, if (digit in 1..9) digits[digit - 1] else "")
                 }
-            exc == 2 -> list.add(0, from20to90(num, digits))
-            exc == 3 -> list.add(0, from100to900(num, digits))
+            2 -> list.add(0, from20to90(num, digits))
+            3 -> list.add(0, from100to900(num, digits))
         }
     }
     exc = 0
     num = n / 1000 //part 2
     if (num > 0) {
-        list.add(0, when {
+        list.add(index = 0, element = when {
                 num % 100 in 11..19 -> "тысяч"
                 num % 10 == 1 -> "тысяча"
                 num % 10 in 2..4 -> "тысячи"
                 else -> "тысяч"
-            }
-        )
+            })
         while (exc < 3) {
             exc++
-            when {
-                exc == 1 ->
+            when (exc) {
+                1 ->
                     if (num % 100 in 10..19) {
                         exc++
                         list.add(0, from10to19(num, digits))
                     } else {
                         val digit = num % 10
-                        list.add(0, when {
-                            digit in 3..9 -> digits[digit - 1]
-                            digit == 1 -> "одна"
-                            digit == 2 -> "две"
-                            else -> ""
-                        })
+                        list.add(index = 0, element = when (digit) {
+                                in 3..9 -> digits[digit - 1]
+                                1 -> "одна"
+                                2 -> "две"
+                                else -> ""
+                            })
                     }
-                exc == 2 -> list.add(0, from20to90(num, digits))
-                exc == 3 -> list.add(0, from100to900(num, digits))
+                2 -> list.add(0, from20to90(num, digits))
+                3 -> list.add(0, from100to900(num, digits))
             }
         }
     }
