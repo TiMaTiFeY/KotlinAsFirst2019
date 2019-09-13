@@ -138,6 +138,7 @@ fun center(list: MutableList<Double>): MutableList<Double> {
     for (i in 0 until list.size) list[i] -= mean
     return list
 }
+
 /**
  * Средняя
  *
@@ -360,8 +361,9 @@ fun from10to19(num: Int, digits: List<String>): String {
         else -> digits[num % 10 - 1].substring(0, digits[num % 10 - 1].length - 1) + "надцать"
     }
 }
+
 fun from20to90(num: Int, digits: List<String>): String {
-    return when (num  % 100 / 10){
+    return when (num % 100 / 10){
         in 2..3 -> digits[num % 100 / 10 - 1] + "дцать"
         4 -> "сорок"
         9 -> "девяносто"
@@ -369,6 +371,7 @@ fun from20to90(num: Int, digits: List<String>): String {
         else -> digits[num % 100 / 10 - 1] + "десят"
     }
 }
+
 fun from100to900(num: Int, digits: List<String>): String {
     return when (num / 100) {
         1 -> "сто"
@@ -402,12 +405,15 @@ fun russian(n: Int): String {
     exc = 0
     num = n / 1000 //part 2
     if (num > 0) {
-        list.add(index = 0, element = when {
+        list.add(
+            index = 0,
+            element = when {
                 num % 100 in 11..19 -> "тысяч"
                 num % 10 == 1 -> "тысяча"
                 num % 10 in 2..4 -> "тысячи"
                 else -> "тысяч"
-            })
+            }
+        )
         while (exc < 3) {
             exc++
             when (exc) {
@@ -417,12 +423,15 @@ fun russian(n: Int): String {
                         list.add(0, from10to19(num, digits))
                     } else {
                         val digit = num % 10
-                        list.add(index = 0, element = when (digit) {
+                        list.add(
+                            index = 0,
+                            element = when (digit) {
                                 in 3..9 -> digits[digit - 1]
                                 1 -> "одна"
                                 2 -> "две"
                                 else -> ""
-                            })
+                            }
+                        )
                     }
                 2 -> list.add(0, from20to90(num, digits))
                 3 -> list.add(0, from100to900(num, digits))
