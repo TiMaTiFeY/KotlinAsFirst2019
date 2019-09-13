@@ -289,7 +289,7 @@ fun hasDifferentDigits(n: Int): Boolean {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun getNum(n: Int, operation: (Int) -> Int ): Int {
+fun getNum(n: Int, operation: (Int) -> Int): Int {
     var step = 0
     var count = 0
     while (step < n) {
