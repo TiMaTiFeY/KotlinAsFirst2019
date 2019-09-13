@@ -103,16 +103,14 @@ fun fib(n: Int): Int {
  * Для заданных чисел m и n найти наименьшее общее кратное, то есть,
  * минимальное число k, которое делится и на m и на n без остатка
  */
-fun lcm(m: Int, n: Int): Int {
-    var nod = 1
-    for (i in min(n, m) downTo 1) {
-        if ((m % i == 0) && (n % i == 0)) {
-            nod = i
-            break
-        }
-    }
-    return m * n / nod
+fun nodOfNumbers(m: Int, n: Int): Int {
+    var a = m
+    var b = n
+    while  ((a != 0) && (b != 0)) if (a <= b) b %= a else a %= b
+    return max(a, b)
 }
+
+fun lcm(m: Int, n: Int): Int = m / nodOfNumbers(m, n) * n
 
 /**
  * Простая
@@ -120,9 +118,9 @@ fun lcm(m: Int, n: Int): Int {
  * Для заданного числа n > 1 найти минимальный делитель, превышающий 1
  */
 fun minDivisor(n: Int): Int {
-    var divisor = 2
-    while (n % divisor != 0) divisor += 1
-    return divisor
+    if (n % 2 == 0) return 2
+    for (divisor in 3..sqrt(n.toDouble()).toInt() step 2) if (n % divisor == 0) return divisor
+    return n
 }
 
 /**
@@ -131,9 +129,10 @@ fun minDivisor(n: Int): Int {
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
 fun maxDivisor(n: Int): Int {
-    var divisor = n / 2
-    while (n % divisor != 0) divisor -= 1
-    return divisor
+    if (n % 2 == 0) return n / 2 // если четное
+    if (sqrt(n.toDouble()).toInt().toDouble() == sqrt(n.toDouble())) return sqrt(n.toDouble()).toInt() // если нечетный полный квадрат
+    for (divisor in n / 2 - 1 downTo 3 step 2) if (n % divisor == 0) return divisor
+    return 1
 }
 
 /**
@@ -143,10 +142,7 @@ fun maxDivisor(n: Int): Int {
  * Взаимно простые числа не имеют общих делителей, кроме 1.
  * Например, 25 и 49 взаимно простые, а 6 и 8 -- нет.
  */
-fun isCoPrime(m: Int, n: Int): Boolean {
-    for (i in 2..min(m, n)) if ((m % i == 0) && (n % i == 0)) return false
-    return true
-}
+fun isCoPrime(m: Int, n: Int): Boolean = nodOfNumbers(m, n) == 1
 
 /**
  * Простая
@@ -268,15 +264,7 @@ fun revert(n: Int): Int {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun isPalindrome(n: Int): Boolean {
-    var reverse = 0
-    var num = n
-    while (num > 0) {
-        reverse = reverse * 10 + num % 10
-        num /= 10
-    }
-    return reverse == n
-}
+fun isPalindrome(n: Int): Boolean = n == revert(n)
 
 /**
  * Средняя
@@ -307,22 +295,13 @@ fun hasDifferentDigits(n: Int): Boolean {
  * Использовать операции со строками в этой задаче запрещается.
  */
 fun squareSequenceDigit(n: Int): Int {
-    var k = 1
-    var k10 = 1.0
     var step = 0
     var count = 0
     while (step < n) {
         count += 1
-        if (count * count >= k10 * 10) {
-            k += 1
-            k10 *= 10
-        }
-        step += k
+        step += digitNumber(count * count)
     }
-    var num = count * count
-    val dif = step - n
-    for (i in 1..dif) num /= 10
-    return num % 10
+    return (1..step - n).fold(count * count) { previous, _ -> previous / 10 } % 10
 }
 
 /**
@@ -337,8 +316,6 @@ fun squareSequenceDigit(n: Int): Int {
  */
 fun fibSequenceDigit(n: Int): Int {
     if (n in 1..2) return 1
-    var k = 1
-    var k10 = 1.0
     var step = 2
     var a = 1
     var b = 1
@@ -346,14 +323,7 @@ fun fibSequenceDigit(n: Int): Int {
         val c = a + b
         a = b
         b = c
-        while (b > k10 * 10) {
-            k += 1
-            k10 *= 10
-        }
-        step += k
+        step += digitNumber(b)
     }
-    var num = b
-    val dif = step - n
-    for (i in 1..dif) num /= 10
-    return num % 10
+    return (1..step - n).fold(b) { previous, _ -> previous / 10 } % 10
 }

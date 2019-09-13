@@ -133,8 +133,7 @@ fun mean(list: List<Double>): Double = if (list.isEmpty()) 0.0 else list.sum() /
  * Обратите внимание, что данная функция должна изменять содержание списка list, а не его копии.
  */
 fun center(list: MutableList<Double>): MutableList<Double> {
-    if (list.isEmpty()) return list
-    val mean = list.sum() / list.size
+    val mean = mean(list)
     for (i in 0 until list.size) list[i] -= mean
     return list
 }
@@ -146,11 +145,7 @@ fun center(list: MutableList<Double>): MutableList<Double> {
  * представленные в виде списков a и b. Скалярное произведение считать по формуле:
  * C = a1b1 + a2b2 + ... + aNbN. Произведение пустых векторов считать равным 0.
  */
-fun times(a: List<Int>, b: List<Int>): Int {
-    var res = 0
-    for (i in 0 until a.size) res += a[i] * b[i]
-    return res
-}
+fun times(a: List<Int>, b: List<Int>): Int = (a.indices).fold(0) { previous, i -> previous + a[i] * b[i]}
 
 /**
  * Средняя
@@ -213,19 +208,7 @@ fun factorize(n: Int): List<Int> {
  * Результат разложения вернуть в виде строки, например 75 -> 3*5*5
  * Множители в результирующей строке должны располагаться по возрастанию.
  */
-fun factorizeToString(n: Int): String {
-    var factor = 2
-    var num = n
-    val list = mutableListOf<Int>()
-    while (num > 1) {
-        while (num % factor == 0) {
-            list.add(factor)
-            num /= factor
-        }
-        factor++
-    }
-    return list.joinToString(separator = "*")
-}
+fun factorizeToString(n: Int): String = factorize(n).joinToString(separator = "*")
 
 /**
  * Средняя
@@ -237,11 +220,10 @@ fun factorizeToString(n: Int): String {
 fun convert(n: Int, base: Int): List<Int> {
     var num = n
     val list = mutableListOf<Int>()
-    if (n == 0) return listOf(0)
-    while (num > 0) {
+    do {
         list.add(0, num % base)
         num /= base
-    }
+    } while (num > 0)
     return list
 }
 
@@ -258,14 +240,7 @@ fun convert(n: Int, base: Int): List<Int> {
  */
 fun convertToString(n: Int, base: Int): String {
     val alf = "abcdefghijklmnopqrstuvwxyz"
-    var num = n
-    if (n == 0) return "0"
-    val list = mutableListOf<Int>()
-    while (num > 0) {
-        list.add(0, num % base)
-        num /= base
-    }
-    return list.joinToString(separator = "", transform = { if (it < 10) "$it" else alf[it - 10].toString() })
+    return convert(n, base).joinToString(separator = "", transform = { if (it < 10) "$it" else alf[it - 10].toString() })
 }
 
 /**
@@ -299,13 +274,9 @@ fun decimal(digits: List<Int>, base: Int): Int {
  */
 fun decimalFromString(str: String, base: Int): Int {
     val alf = "abcdefghijklmnopqrstuvwxyz"
-    var num = 1
-    var res = 0
-    for (i in str.length - 1 downTo 0) {
-        res += (if (str[i] in alf) alf.indexOf(str[i]) + 10 else str[i].toString().toInt()) * num
-        num *= base
-    }
-    return res
+    val list = mutableListOf<Int>()
+    for (char in str) list.add(if (char in alf) alf.indexOf(char) + 10 else char.toString().toInt())
+    return decimal(list, base)
 }
 
 /**
@@ -352,91 +323,60 @@ fun roman(n: Int): String {
  * Например, 375 = "триста семьдесят пять",
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
-//Вспомогательные функции для этой задачи
-fun from10to19(num: Int, digits: List<String>): String {
-    return when {
-        num % 100 == 10 -> "десять"
-        num % 10 == 2 -> "двенадцать"
-        num % 10 in 1..3 -> digits[num % 10 - 1] + "надцать"
-        else -> digits[num % 10 - 1].substring(0, digits[num % 10 - 1].length - 1) + "надцать"
-    }
-}
+val digits = listOf("один", "два", "три",
+                    "четыре", "пять", "шесть",
+                    "семь", "восемь", "девять")
 
-fun from20to90(num: Int, digits: List<String>): String {
-    return when (num % 100 / 10){
-        in 2..3 -> digits[num % 100 / 10 - 1] + "дцать"
-        4 -> "сорок"
-        9 -> "девяносто"
-        0 -> ""
-        else -> digits[num % 100 / 10 - 1] + "десят"
-    }
-}
+val nums11To19 = listOf("одиннадцать", "двенадцать", "тринадцать",
+                        "четырнадцать", "пятнадцать", "шестнадцать",
+                        "семнадцать", "восемнадцать", "девятнадцать")
 
-fun from100to900(num: Int, digits: List<String>): String {
-    return when (num / 100) {
-        1 -> "сто"
-        2 -> "двести"
-        in 3..4 -> digits[num / 100 - 1] + "ста"
-        0 -> ""
-        else -> digits[num / 100 - 1] + "сот"
-    }
+val decades = listOf("десять", "двадцать", "тридцать",
+                     "сорок", "пятьдесят", "шестьдесят",
+                     "семьдесят", "восемьдесят", "девяносто")
+
+val hundreds = listOf("сто", "двести", "триста",
+                      "четыреста", "пятьсот", "шестьсот",
+                      "семьсот", "восемьсот", "девятьсот")
+
+fun threeFigures(n: Int): List<String> {
+    val list = mutableListOf<String>()
+    var exc = 1
+    do {
+        when (exc) {
+            1 -> if (n % 100 in 10..19) {
+                     exc = 2
+                     list.add(
+                         0,
+                         if (n % 100 == 10) decades[0] else nums11To19[n % 10 - 1]
+                     )
+                 } else if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
+            2 -> if (n % 100 / 10 != 0) list.add(0, decades[n % 100 / 10 - 1])
+            3 -> if (n / 100 != 0) list.add(0, hundreds[n / 100 - 1])
+        }
+        exc++
+    } while (exc <= 3)
+    return list
 }
 
 fun russian(n: Int): String {
-    val list = mutableListOf<String>()
-    val digits = listOf("один", "два", "три", "четыре", "пять", "шесть", "семь", "восемь", "девять")
-    var num = n % 1000 //part 1
-    var exc = 0
-    while (exc < 3) {
-        exc++
-        when (exc) {
-            1 ->
-                if (num % 100 in 10..19) {
-                    exc++
-                    list.add(0, from10to19(num, digits))
-                } else {
-                    val digit = num % 10
-                    list.add(0, if (digit in 1..9) digits[digit - 1] else "")
-                }
-            2 -> list.add(0, from20to90(num, digits))
-            3 -> list.add(0, from100to900(num, digits))
-        }
-    }
-    exc = 0
-    num = n / 1000 //part 2
-    if (num > 0) {
-        list.add(
-            index = 0,
-            element = when {
-                num % 100 in 11..19 -> "тысяч"
-                num % 10 == 1 -> "тысяча"
-                num % 10 in 2..4 -> "тысячи"
-                else -> "тысяч"
+    val listThousand = threeFigures(n / 1000)
+    val res = mutableListOf<String>()
+    res += listThousand
+    if (listThousand.isNotEmpty())
+        when (listThousand.last()) {
+            in nums11To19 -> res.add("тысяч")
+            "один" -> {
+                res.remove("один")
+                res.add("одна тысяча")
             }
-        )
-        while (exc < 3) {
-            exc++
-            when (exc) {
-                1 ->
-                    if (num % 100 in 10..19) {
-                        exc++
-                        list.add(0, from10to19(num, digits))
-                    } else {
-                        val digit = num % 10
-                        list.add(
-                            index = 0,
-                            element = when (digit) {
-                                in 3..9 -> digits[digit - 1]
-                                1 -> "одна"
-                                2 -> "две"
-                                else -> ""
-                            }
-                        )
-                    }
-                2 -> list.add(0, from20to90(num, digits))
-                3 -> list.add(0, from100to900(num, digits))
+            "два" -> {
+                res.remove("два")
+                res.add("две тысячи")
             }
+            "три", "четыре" -> res.add("тысячи")
+            else -> res.add("тысяч")
         }
-    }
-    return list.filter { it != "" }.joinToString(separator = " ")
+    res += threeFigures(n % 1000)
+    return res.joinToString(separator = " ")
 }
