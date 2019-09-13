@@ -145,7 +145,7 @@ fun center(list: MutableList<Double>): MutableList<Double> {
  * представленные в виде списков a и b. Скалярное произведение считать по формуле:
  * C = a1b1 + a2b2 + ... + aNbN. Произведение пустых векторов считать равным 0.
  */
-fun times(a: List<Int>, b: List<Int>): Int = (a.indices).fold(0) { previous, i -> previous + a[i] * b[i]}
+fun times(a: List<Int>, b: List<Int>): Int = (a.indices).fold(0) { previous, i -> previous + a[i] * b[i] }
 
 /**
  * Средняя
