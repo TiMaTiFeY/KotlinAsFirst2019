@@ -131,7 +131,8 @@ fun minDivisor(n: Int): Int {
 fun maxDivisor(n: Int): Int {
     if (n % 2 == 0) return n / 2 // если четное
     if (sqrt(n.toDouble()).toInt().toDouble() == sqrt(n.toDouble())) return sqrt(n.toDouble()).toInt() // если нечетный полный квадрат
-    for (divisor in n / 2 - 1 downTo 3 step 2) if (n % divisor == 0) return divisor
+    val startDivisor = if (n / 2 % 2 == 0) n / 2 - 1 else n / 2
+    for (divisor in startDivisor downTo 3 step 2) if (n % divisor == 0) return divisor
     return 1
 }
 
