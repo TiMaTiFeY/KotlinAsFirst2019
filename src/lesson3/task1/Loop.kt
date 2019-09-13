@@ -106,7 +106,7 @@ fun fib(n: Int): Int {
 fun nodOfNumbers(m: Int, n: Int): Int {
     var a = m
     var b = n
-    while  ((a != 0) && (b != 0)) if (a <= b) b %= a else a %= b
+    while ((a != 0) && (b != 0)) if (a <= b) b %= a else a %= b
     return max(a, b)
 }
 
@@ -128,13 +128,7 @@ fun minDivisor(n: Int): Int {
  *
  * Для заданного числа n > 1 найти максимальный делитель, меньший n
  */
-fun maxDivisor(n: Int): Int {
-    if (n % 2 == 0) return n / 2 // если четное
-    if (sqrt(n.toDouble()).toInt().toDouble() == sqrt(n.toDouble())) return sqrt(n.toDouble()).toInt() // если нечетный полный квадрат
-    val startDivisor = if (n / 2 % 2 == 0) n / 2 - 1 else n / 2
-    for (divisor in startDivisor downTo 3 step 2) if (n % divisor == 0) return divisor
-    return 1
-}
+fun maxDivisor(n: Int): Int = n / minDivisor(n)
 
 /**
  * Простая
@@ -295,15 +289,19 @@ fun hasDifferentDigits(n: Int): Boolean {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun squareSequenceDigit(n: Int): Int {
+fun getNum(n: Int, operation: (Int) -> Int ): Int {
     var step = 0
     var count = 0
     while (step < n) {
         count += 1
-        step += digitNumber(count * count)
+        step += digitNumber(operation(count))
     }
-    return (1..step - n).fold(count * count) { previous, _ -> previous / 10 } % 10
+    var num = operation(count)
+    for (i in 1..step - n) num /= 10
+    return num % 10
 }
+
+fun squareSequenceDigit(n: Int): Int = getNum(n) { it * it }
 
 /**
  * Сложная
@@ -315,16 +313,4 @@ fun squareSequenceDigit(n: Int): Int {
  *
  * Использовать операции со строками в этой задаче запрещается.
  */
-fun fibSequenceDigit(n: Int): Int {
-    if (n in 1..2) return 1
-    var step = 2
-    var a = 1
-    var b = 1
-    while (step < n) {
-        val c = a + b
-        a = b
-        b = c
-        step += digitNumber(b)
-    }
-    return (1..step - n).fold(b) { previous, _ -> previous / 10 } % 10
-}
+fun fibSequenceDigit(n: Int): Int = getNum(n) { fib(it) }

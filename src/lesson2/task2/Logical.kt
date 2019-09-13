@@ -79,10 +79,11 @@ fun circleInside(
 fun brickPasses(a: Int, b: Int, c: Int, r: Int, s: Int): Boolean {
     val minValue = min(r, s)
     val maxValue = max(r, s)
-    return when {
-        ((min(a, b) <= minValue) && (max(a, b) <= maxValue)) -> true
-        ((min(a, c) <= minValue) && (max(a, c) <= maxValue)) -> true
-        ((min(c, b) <= minValue) && (max(c, b) <= maxValue)) -> true
-        else -> false
+    val minSize = min(a, min(b, c))
+    val avgSize = when (minSize) {
+        a -> min(b, c)
+        b -> min(a, c)
+        else -> min(a, b)
     }
+    return (minSize <= minValue) && (avgSize <= maxValue)
 }

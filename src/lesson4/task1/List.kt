@@ -145,7 +145,7 @@ fun center(list: MutableList<Double>): MutableList<Double> {
  * представленные в виде списков a и b. Скалярное произведение считать по формуле:
  * C = a1b1 + a2b2 + ... + aNbN. Произведение пустых векторов считать равным 0.
  */
-fun times(a: List<Int>, b: List<Int>): Int = (a.indices).fold(0) { previous, i -> previous + a[i] * b[i] }
+fun times(a: List<Int>, b: List<Int>): Int = (a zip b).map { (x, y) -> x * y }.sum()
 
 /**
  * Средняя
@@ -278,7 +278,7 @@ fun decimal(digits: List<Int>, base: Int): Int {
 fun decimalFromString(str: String, base: Int): Int {
     val alf = "abcdefghijklmnopqrstuvwxyz"
     val list = mutableListOf<Int>()
-    for (char in str) list.add(if (char in alf) alf.indexOf(char) + 10 else char.toString().toInt())
+    for (char in str) list.add(if (char in alf) char - 'a' + 10 else char.toString().toInt())
     return decimal(list, base)
 }
 
@@ -352,22 +352,16 @@ val hundreds = listOf(
 
 fun threeFigures(n: Int): List<String> {
     val list = mutableListOf<String>()
-    var exc = 1
-    do {
-        when (exc) {
-            1 ->
-                if (n % 100 in 10..19) {
-                    exc++
-                    list.add(
-                        index = 0,
-                        element = if (n % 100 == 10) decades[0] else numb11To19[n % 10 - 1]
-                    )
-                } else if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
-            2 -> if (n % 100 / 10 != 0) list.add(0, decades[n % 100 / 10 - 1])
-            3 -> if (n / 100 != 0) list.add(0, hundreds[n / 100 - 1])
-        }
-        exc++
-    } while (exc <= 3)
+    if (n % 100 in 10..19) {
+        list.add(
+            index = 0,
+            element = if (n % 100 == 10) decades[0] else numb11To19[n % 10 - 1]
+        )
+    } else {
+        if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
+        if (n % 100 / 10 != 0) list.add(0, decades[n % 100 / 10 - 1])
+    }
+    if (n / 100 != 0) list.add(0, hundreds[n / 100 - 1])
     return list
 }
 
