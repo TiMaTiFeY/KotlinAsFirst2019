@@ -240,7 +240,10 @@ fun convert(n: Int, base: Int): List<Int> {
  */
 fun convertToString(n: Int, base: Int): String {
     val alf = "abcdefghijklmnopqrstuvwxyz"
-    return convert(n, base).joinToString(separator = "", transform = { if (it < 10) "$it" else alf[it - 10].toString() })
+    return convert(n, base).joinToString(
+        separator = "",
+        transform = { if (it < 10) "$it" else alf[it - 10].toString() }
+    )
 }
 
 /**
@@ -323,34 +326,43 @@ fun roman(n: Int): String {
  * Например, 375 = "триста семьдесят пять",
  * 23964 = "двадцать три тысячи девятьсот шестьдесят четыре"
  */
-val digits = listOf("один", "два", "три",
-                    "четыре", "пять", "шесть",
-                    "семь", "восемь", "девять")
+val digits = listOf(
+    "один", "два", "три",
+    "четыре", "пять", "шесть",
+    "семь", "восемь", "девять"
+)
 
-val nums11To19 = listOf("одиннадцать", "двенадцать", "тринадцать",
-                        "четырнадцать", "пятнадцать", "шестнадцать",
-                        "семнадцать", "восемнадцать", "девятнадцать")
+val numb11To19 = listOf(
+    "одиннадцать", "двенадцать", "тринадцать",
+    "четырнадцать", "пятнадцать", "шестнадцать",
+    "семнадцать", "восемнадцать", "девятнадцать"
+)
 
-val decades = listOf("десять", "двадцать", "тридцать",
-                     "сорок", "пятьдесят", "шестьдесят",
-                     "семьдесят", "восемьдесят", "девяносто")
+val decades = listOf(
+    "десять", "двадцать", "тридцать",
+    "сорок", "пятьдесят", "шестьдесят",
+    "семьдесят", "восемьдесят", "девяносто"
+)
 
-val hundreds = listOf("сто", "двести", "триста",
-                      "четыреста", "пятьсот", "шестьсот",
-                      "семьсот", "восемьсот", "девятьсот")
+val hundreds = listOf(
+    "сто", "двести", "триста",
+    "четыреста", "пятьсот", "шестьсот",
+    "семьсот", "восемьсот", "девятьсот"
+)
 
 fun threeFigures(n: Int): List<String> {
     val list = mutableListOf<String>()
     var exc = 1
     do {
         when (exc) {
-            1 -> if (n % 100 in 10..19) {
-                     exc = 2
-                     list.add(
-                         0,
-                         if (n % 100 == 10) decades[0] else nums11To19[n % 10 - 1]
-                     )
-                 } else if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
+            1 ->
+                if (n % 100 in 10..19) {
+                    exc++
+                    list.add(
+                        index = 0,
+                        element = if (n % 100 == 10) decades[0] else numb11To19[n % 10 - 1]
+                    )
+                } else if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
             2 -> if (n % 100 / 10 != 0) list.add(0, decades[n % 100 / 10 - 1])
             3 -> if (n / 100 != 0) list.add(0, hundreds[n / 100 - 1])
         }
@@ -365,7 +377,7 @@ fun russian(n: Int): String {
     res += listThousand
     if (listThousand.isNotEmpty())
         when (listThousand.last()) {
-            in nums11To19 -> res.add("тысяч")
+            in numb11To19 -> res.add("тысяч")
             "один" -> {
                 res.remove("один")
                 res.add("одна тысяча")
