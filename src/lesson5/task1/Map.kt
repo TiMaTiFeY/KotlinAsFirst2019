@@ -219,7 +219,8 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean = word.all { it.toLowerCase() in chars }
+fun canBuildFrom(chars: List<Char>, word: String): Boolean =
+    word.all { it0 -> it0.toLowerCase() in chars.map { it.toLowerCase() } }
 
 /**
  * Средняя
@@ -329,11 +330,15 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
+fun countElement(n: Int, list: List<Int>): Int = list.map { if (it == n) 1 else 0 }.sum()
+
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
     val set = list.toMutableSet()
     for (i in 0..list.size - 2)
-        if (number - list[i] in set) return Pair(i, list.indexOf(number - list[i]))
-        else set -= list[i]
+        if (number - list[i] in set)
+            if ((number - list[i] != list[i]) || (countElement(list[i], list) > 1))
+                return Pair(i, list.indexOf(number - list[i]))
+            else set -= list[i]
     return Pair(-1, -1)
 }
 
@@ -373,12 +378,15 @@ fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<Strin
             val price = list[count - 1].second.second
             val treas = list[count - 1].first
 
-            if (w > weight) d[count][weight] = d[count - 1][weight]
-            else if (d[count - 1][weight - w].first + price >= d[count - 1][weight].first)
-                d[count][weight] = Pair(
-                    d[count - 1][weight - w].first + price,
-                    (d[count - 1][weight - w].second + treas).toMutableSet()
-                )
+            when {
+                w > weight -> d[count][weight] = d[count - 1][weight]
+                d[count - 1][weight - w].first + price > d[count - 1][weight].first ->
+                    d[count][weight] = Pair(
+                        d[count - 1][weight - w].first + price,
+                        (d[count - 1][weight - w].second + treas).toMutableSet()
+                    )
+                else -> d[count][weight] = d[count - 1][weight]
+            }
         }
 
     return d[treasures.size][capacity].second
