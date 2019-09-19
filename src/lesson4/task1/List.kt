@@ -4,6 +4,7 @@ package lesson4.task1
 
 import lesson1.task1.discriminant
 import kotlin.math.sqrt
+import kotlin.math.pow
 
 /**
  * Пример
@@ -278,7 +279,7 @@ fun decimal(digits: List<Int>, base: Int): Int {
 fun decimalFromString(str: String, base: Int): Int {
     val alf = "abcdefghijklmnopqrstuvwxyz"
     val list = mutableListOf<Int>()
-    for (char in str) list.add(if (char in alf) char - 'a' + 10 else char.toString().toInt())
+    for (char in str) list.add(if (char in alf) char - 'a' + 10 else char - '0')
     return decimal(list, base)
 }
 
@@ -350,39 +351,25 @@ val hundreds = listOf(
     "семьсот", "восемьсот", "девятьсот"
 )
 
-fun threeFigures(n: Int): List<String> {
+fun threeFigures(n: Int, isThousands: Boolean = false): List<String> {
     val list = mutableListOf<String>()
     if (n % 100 in 10..19) {
         list.add(
             index = 0,
             element = if (n % 100 == 10) decades[0] else numb11To19[n % 10 - 1]
         )
+        if (isThousands) list.add("тысяч")
     } else {
-        if (n % 10 != 0) list.add(0, digits[n % 10 - 1])
+        if (n % 10 != 0) when (n % 10) {
+            1 -> list.add(0, if (isThousands) "одна тысяча" else digits[0])
+            2 -> list.add(0, if (isThousands) "две тысячи" else digits[1])
+            in 3..4 -> list.add(0, if (isThousands) "${digits[n % 10 - 1]} тысячи" else digits[n % 10 - 1])
+            else -> list.add(0, if (isThousands) "${digits[n % 10 - 1]} тысяч" else digits[n % 10 - 1])
+        } else if (isThousands && (n != 0)) list.add("тысяч")
         if (n % 100 / 10 != 0) list.add(0, decades[n % 100 / 10 - 1])
     }
     if (n / 100 != 0) list.add(0, hundreds[n / 100 - 1])
     return list
 }
 
-fun russian(n: Int): String {
-    val listThousand = threeFigures(n / 1000)
-    val res = mutableListOf<String>()
-    res += listThousand
-    if (listThousand.isNotEmpty())
-        when (listThousand.last()) {
-            in numb11To19 -> res.add("тысяч")
-            "один" -> {
-                res.remove("один")
-                res.add("одна тысяча")
-            }
-            "два" -> {
-                res.remove("два")
-                res.add("две тысячи")
-            }
-            "три", "четыре" -> res.add("тысячи")
-            else -> res.add("тысяч")
-        }
-    res += threeFigures(n % 1000)
-    return res.joinToString(separator = " ")
-}
+fun russian(n: Int): String = (threeFigures(n / 1000, true) + threeFigures(n % 1000)).joinToString(separator = " ")

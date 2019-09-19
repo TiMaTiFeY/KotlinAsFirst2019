@@ -93,9 +93,7 @@ fun buildWordSet(text: List<String>): MutableSet<String> {
  */
 fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
     val map = mutableMapOf<Int, List<String>>()
-    for ((name, grade) in grades)
-        if (grade in map) map[grade] = map[grade]!! + name
-        else map[grade] = listOf(name)
+    for ((name, grade) in grades) map[grade] = map.getOrDefault(grade, listOf()) + name
     return map
 }
 
@@ -125,9 +123,9 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean = a.keys
  *   subtractOf(a = mutableMapOf("a" to "z"), mapOf("a" to "z"))
  *     -> a changes to mutableMapOf() aka becomes empty
  */
-fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>): Unit {
+fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>) {
     for ((key, value) in b)
-        if ((key in a) && (value == a[key])) a.remove(key)
+        if (value == a[key]) a.remove(key)
 }
 
 /**
@@ -159,7 +157,7 @@ fun whoAreInBoth(a: List<String>, b: List<String>): List<String> = a.toSet().int
 fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<String, String> {
     val map = mapA.toMutableMap()
     for ((key, value) in mapB)
-        if ((key in map) && (map[key] != mapB[key])) map[key] += ", ${mapB[key]}"
+        if ((key in map) && (map[key] != value)) map[key] += ", $value"
         else map += key to value
     return map
 }
@@ -176,9 +174,9 @@ fun mergePhoneBooks(mapA: Map<String, String>, mapB: Map<String, String>): Map<S
  */
 fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Double> {
     val map = mutableMapOf<String, List<Double>>()
-    for (stock in stockPrices)
-        if (stock.first in map) map[stock.first] = map[stock.first]!! + stock.second
-        else map[stock.first] = listOf(stock.second)
+    for ((stock, price) in stockPrices)
+        if (stock in map) map[stock] = map[stock]!! + price
+        else map[stock] = listOf(price)
     val res = mutableMapOf<String, Double>()
     for ((key, value) in map) res[key] = value.sum() / value.size.toDouble()
     return res
@@ -219,8 +217,7 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean =
-    word.all { it0 -> it0.toLowerCase() in chars.map { it.toLowerCase() } }
+fun canBuildFrom(chars: List<Char>, word: String): Boolean = chars.map { it.toLowerCase() }.toSet() == word.toLowerCase().toSet()
 
 /**
  * Средняя
