@@ -199,13 +199,13 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  */
 fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
     var resName = ""
-    var minCost = -1.0
+    var minCost: Double? = null
     for ((name, info) in stuff)
-        if ((info.first == kind) && ((minCost == -1.0) || (info.second < minCost))) {
+        if ((info.first == kind) && ((minCost == null) || (info.second < minCost))) {
             minCost = info.second
             resName = name
         }
-    return if (minCost == -1.0) null else resName
+    return if (minCost == null) null else resName
 }
 
 /**
@@ -217,7 +217,8 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  * Например:
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
-fun canBuildFrom(chars: List<Char>, word: String): Boolean = chars.map { it.toLowerCase() }.toSet() == word.toLowerCase().toSet()
+fun canBuildFrom(chars: List<Char>, word: String): Boolean =
+    chars.map { it.toLowerCase() }.toSet() == word.toLowerCase().toSet()
 
 /**
  * Средняя
@@ -252,8 +253,14 @@ fun extractRepeats(list: List<String>): Map<String, Int> {
 fun hasAnagrams(words: List<String>): Boolean {
     for (i in words.indices) {
         val word = words[i].toSet()
+        val mapA = mutableMapOf<Char, Int>()
+        for (char in words[i]) mapA[char] = mapA.getOrDefault(char, 0) + 1
         for (j in i + 1 until words.size)
-            if (word == words[j].toSet()) return true
+            if (word == words[j].toSet()) {
+                val mapB = mutableMapOf<Char, Int>()
+                for (char in words[j]) mapB[char] = mapB.getOrDefault(char, 0) + 1
+                if (mapA == mapB) return true
+            }
     }
     return false
 }
@@ -299,7 +306,7 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
             mapFriends[choose] = true
 
             //Проверяем всех тех, с кем дружит человек
-            for (friend in friends[choose]!!) {
+            for (friend in friends.getOrDefault(choose, setOf())) {
                 if (friend != person) map[person] = map[person]!! + friend
                 //Для исключений, когда кто-то дружит с тем, кто не с кем не дружит
                 if (friend !in listFriends) map[friend] = setOf()
@@ -327,15 +334,14 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 4) -> Pair(0, 2)
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
-fun countElement(n: Int, list: List<Int>): Int = list.map { if (it == n) 1 else 0 }.sum()
-
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val set = list.toMutableSet()
-    for (i in 0..list.size - 2)
-        if (number - list[i] in set)
-            if ((number - list[i] != list[i]) || (countElement(list[i], list) > 1))
-                return Pair(i, list.indexOf(number - list[i]))
-            else set -= list[i]
+    val setFind = mutableSetOf<Int>()
+    val mapIndex = mutableMapOf<Int, Int>()
+    for (i in list.indices) {
+        if (list[i] in setFind) return Pair(mapIndex.getOrDefault(list[i], 0), i)
+        setFind += (number - list[i])
+        mapIndex[list[i]] = i
+    }
     return Pair(-1, -1)
 }
 
