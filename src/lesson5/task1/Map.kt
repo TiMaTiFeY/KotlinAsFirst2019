@@ -218,7 +218,7 @@ fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): S
  *   canBuildFrom(listOf('a', 'b', 'o'), "baobab") -> true
  */
 fun canBuildFrom(chars: List<Char>, word: String): Boolean =
-    chars.map { it.toLowerCase() }.toSet() == word.toLowerCase().toSet()
+    if (word == "") true else chars.map { it.toLowerCase() }.toSet() == word.toLowerCase().toSet()
 
 /**
  * Средняя
@@ -339,8 +339,9 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
     val mapIndex = mutableMapOf<Int, Int>()
     for (i in list.indices) {
         if (list[i] in setFind) return Pair(mapIndex.getOrDefault(list[i], 0), i)
-        setFind += (number - list[i])
-        mapIndex[list[i]] = i
+        val second = number - list[i]
+        setFind += second
+        mapIndex[second] = i
     }
     return Pair(-1, -1)
 }
