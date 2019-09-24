@@ -198,14 +198,14 @@ fun averageStockPrice(stockPrices: List<Pair<String, Double>>): Map<String, Doub
  *   ) -> "Мария"
  */
 fun findCheapestStuff(stuff: Map<String, Pair<String, Double>>, kind: String): String? {
-    var resName = ""
+    var resName: String? = null
     var minCost: Double? = null
     for ((name, info) in stuff)
         if ((info.first == kind) && ((minCost == null) || (info.second < minCost))) {
             minCost = info.second
             resName = name
         }
-    return if (minCost == null) null else resName
+    return resName
 }
 
 /**
@@ -335,12 +335,10 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val setFind = mutableSetOf<Int>()
     val mapIndex = mutableMapOf<Int, Int>()
     for (i in list.indices) {
-        if (list[i] in setFind) return Pair(mapIndex.getOrDefault(list[i], 0), i)
+        if (list[i] in mapIndex) return Pair(mapIndex.getOrDefault(list[i], 0), i)
         val second = number - list[i]
-        setFind += second
         mapIndex[second] = i
     }
     return Pair(-1, -1)
