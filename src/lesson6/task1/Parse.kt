@@ -209,7 +209,7 @@ fun bestHighJump(jumps: String): Int {
  */
 fun plusMinus(expression: String): Int {
     val list = expression.split(' ')
-    require(list.isNotEmpty())
+    require(list[0] != "")
     var res = 0
     var mark = 1
     for (i in list.indices) {
@@ -392,13 +392,8 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 if (transporter[position] == 0) indexCommands = secondIndex
                 else queueBrackets.add(0, Pair(indexCommands, secondIndex))
             }
-            ']' -> {
-                if (transporter[position] != 0)
-                    indexCommands = queueBrackets[0].first
-                else {
-                    queueBrackets.removeAt(0)
-                }
-            }
+            ']' -> if (transporter[position] != 0) indexCommands = queueBrackets[0].first
+            else queueBrackets.removeAt(0)
         }
         countCommands++
         indexCommands++
