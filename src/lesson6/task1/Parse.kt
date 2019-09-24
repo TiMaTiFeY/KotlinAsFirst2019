@@ -2,6 +2,8 @@
 
 package lesson6.task1
 
+import lesson2.task2.daysInMonth
+
 /**
  * Пример
  *
@@ -69,7 +71,24 @@ fun main() {
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30.02.2009) считается неверными
  * входными данными.
  */
-fun dateStrToDigit(str: String): String = TODO()
+val months = listOf(
+    "января", "февраля", "марта", "апреля",
+    "мая", "июня", "июля", "августа",
+    "сентября", "октября", "ноября", "декабря"
+)
+
+fun dateStrToDigit(str: String): String {
+    val parts = str.split(" ")
+    try {
+        val month = if (parts[1] in months) months.indexOf(parts[1]) + 1 else return ""
+        val day = parts[0].toInt()
+        val year = parts[2].toInt()
+        if ((day < 1) || (year < 1) || (day > daysInMonth(month, year))) return ""
+        return "%02d.%02d.%04d".format(day, month, year)
+    } catch (e: Exception) {
+        return ""
+    }
+}
 
 /**
  * Средняя
@@ -81,7 +100,20 @@ fun dateStrToDigit(str: String): String = TODO()
  * Обратите внимание: некорректная с точки зрения календаря дата (например, 30 февраля 2009) считается неверными
  * входными данными.
  */
-fun dateDigitToStr(digital: String): String = TODO()
+fun dateDigitToStr(digital: String): String {
+    val parts = digital.split(".")
+    if (parts.size != 3) return ""
+    try {
+        val day = parts[0].toInt()
+        val month = parts[1].toInt()
+        if (month !in 1..12) return ""
+        val year = parts[2].toInt()
+        if ((day < 1) || (year < 1) || (day > daysInMonth(month, year))) return ""
+        return "$day ${months[month - 1]} $year"
+    } catch (e: Exception) {
+        return ""
+    }
+}
 
 /**
  * Средняя
@@ -97,7 +129,19 @@ fun dateDigitToStr(digital: String): String = TODO()
  *
  * PS: Дополнительные примеры работы функции можно посмотреть в соответствующих тестах.
  */
-fun flattenPhoneNumber(phone: String): String = TODO()
+
+fun flattenPhoneNumber(phone: String): String {
+    val parts = phone.replace(" ", "").replace("-", "")
+    val setPhone = parts.toSet() - '+' - '(' - ')'
+    if (!setPhone.all { it in '0'..'9' }) return ""
+    if (('+' in parts.toSet()) && (parts[0] != '+')) return ""
+    val s = parts.split("(")
+    return if (s.size != 1)
+        if ((')' in s[1]) && (s.size == 2) && (s[1][0] != ')'))
+            parts.replace("(", "").replace(")", "")
+        else ""
+    else parts
+}
 
 /**
  * Средняя
@@ -109,7 +153,20 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * Прочитать строку и вернуть максимальное присутствующее в ней число (717 в примере).
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
-fun bestLongJump(jumps: String): Int = TODO()
+fun bestLongJump(jumps: String): Int {
+    val parts = jumps.split(" ")
+    var maxJump: Int? = null
+    for (i in parts) {
+        if ((i != "%") && (i != "-"))
+            try {
+                val n = i.toInt()
+                maxJump = if (maxJump == null) n else kotlin.math.max(maxJump, n)
+            } catch (e: NumberFormatException) {
+                return -1
+            }
+    }
+    return maxJump ?: -1
+}
 
 /**
  * Сложная
@@ -208,4 +265,66 @@ fun fromRoman(roman: String): Int = TODO()
  * IllegalArgumentException должен бросаться даже если ошибочная команда не была достигнута в ходе выполнения.
  *
  */
-fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> = TODO()
+fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
+    val setCorrectCommands = setOf('>', '<', '+', '-', '[', ']', ' ')
+    require((commands.toSet() - setCorrectCommands).isEmpty())
+    var k = 0
+    for (i in commands.indices) {
+        if (commands[i] == '[') k++
+        if (commands[i] == ']') k--
+        require(k >= 0)
+    }
+    require(k == 0)
+
+    var position = cells / 2
+    var countCommands = 0
+    var indexCommands = 0
+    var inSquareBrackets = false
+    val queueBrackets = mutableListOf<Pair<Int, Int>>()
+
+    val transporter = mutableListOf<Int>()
+    for (i in 0 until cells) transporter.add(0)
+
+    while ((countCommands < limit) && (indexCommands < commands.length)) {
+        when (commands[indexCommands]) {
+            '>' -> {
+                check(position != cells - 1)
+                position++
+            }
+            '<' -> {
+                check(position != 0)
+                position--
+            }
+            '+' -> transporter[position]++
+            '-' -> transporter[position]--
+            '[' -> {
+                var secondIndex = indexCommands + 1
+                var h = 0
+                while (secondIndex < commands.length) {
+                    if (commands[secondIndex] == '[') h++
+                    if (commands[secondIndex] == ']')
+                        if (h != 0) h--
+                        else break
+                    secondIndex++
+                }
+                if (transporter[position] == 0) indexCommands = secondIndex
+                else {
+                    queueBrackets.add(0, Pair(indexCommands, secondIndex))
+                    inSquareBrackets = true
+                }
+            }
+            ']' -> {
+                require(inSquareBrackets)
+                if (transporter[position] != 0)
+                    indexCommands = queueBrackets[0].first
+                else {
+                    queueBrackets.removeAt(0)
+                    if (queueBrackets.isEmpty()) inSquareBrackets = false
+                }
+            }
+        }
+        countCommands++
+        indexCommands++
+    }
+    return transporter
+}
