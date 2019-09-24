@@ -209,6 +209,7 @@ fun bestHighJump(jumps: String): Int {
  */
 fun plusMinus(expression: String): Int {
     val list = expression.split(' ')
+    require(list.isNotEmpty())
     var res = 0
     var mark = 1
     for (i in list.indices) {
@@ -294,6 +295,7 @@ fun fromRoman(roman: String): Int {
         "LXX" to 70, "LX" to 60, "L" to 50, "XL" to 40, "XXX" to 30, "XX" to 20, "X" to 10,
         "IX" to 9, "VIII" to 8, "VII" to 7, "VI" to 6, "V" to 5, "IV" to 4, "III" to 3, "II" to 2, "I" to 1
     )
+    if (roman.isEmpty()) return -1
     var startIndex = 0
     var endIndex = 0
     while (startIndex < roman.length) {
@@ -307,7 +309,6 @@ fun fromRoman(roman: String): Int {
         res += d.getOrDefault(roman.substring(startIndex, endIndex), 0)
         startIndex = endIndex
     }
-//
     return res
 }
 

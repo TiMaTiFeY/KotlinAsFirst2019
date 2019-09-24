@@ -100,6 +100,7 @@ class Tests {
         assertThrows(IllegalArgumentException::class.java) { plusMinus("4 - -2") }
         assertThrows(IllegalArgumentException::class.java) { plusMinus("44 - - 12") }
         assertThrows(IllegalArgumentException::class.java) { plusMinus("4 - + 12") }
+        assertThrows(IllegalArgumentException::class.java) { plusMinus("") }
     }
 
     @Test
@@ -128,6 +129,7 @@ class Tests {
         assertEquals(694, fromRoman("DCXCIV"))
         assertEquals(49, fromRoman("XLIX"))
         assertEquals(-1, fromRoman("Z"))
+        assertEquals(-1, fromRoman(""))
     }
 
     @Test
