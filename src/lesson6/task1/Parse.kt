@@ -295,7 +295,7 @@ fun fromRoman(roman: String): Int {
         "LXX" to 70, "LX" to 60, "L" to 50, "XL" to 40, "XXX" to 30, "XX" to 20, "X" to 10,
         "IX" to 9, "VIII" to 8, "VII" to 7, "VI" to 6, "V" to 5, "IV" to 4, "III" to 3, "II" to 2, "I" to 1
     )
-    if (roman.isEmpty()) return -1
+    if (roman == "") return -1
     var startIndex = 0
     var endIndex = 0
     while (startIndex < roman.length) {
@@ -349,24 +349,27 @@ fun fromRoman(roman: String): Int {
  *
  */
 fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
+    //Проверка на наличие лишних символов
     val setCorrectCommands = setOf('>', '<', '+', '-', '[', ']', ' ')
     require((commands.toSet() - setCorrectCommands).isEmpty())
+    //Проверка на наличие пары у квадратных скобок
     var k = 0
     for (i in commands.indices) {
-        if (commands[i] == '[') k++
-        if (commands[i] == ']') k--
+        when (commands[i]) {
+            '[' -> k++
+            ']' -> k--
+        }
         require(k >= 0)
     }
     require(k == 0)
-
+    //Начальная инициализация
     var position = cells / 2
     var countCommands = 0
     var indexCommands = 0
-    val queueBrackets = mutableListOf<Pair<Int, Int>>()
-
+    val queueBrackets = mutableListOf<Int>()
     val transporter = mutableListOf<Int>()
     for (i in 0 until cells) transporter.add(0)
-
+    //Основная логика функции
     while ((countCommands < limit) && (indexCommands < commands.length)) {
         when (commands[indexCommands]) {
             '>' -> {
@@ -380,6 +383,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
             '+' -> transporter[position]++
             '-' -> transporter[position]--
             '[' -> {
+                //Поиск индекса ']' для данной скобки
                 var secondIndex = indexCommands + 1
                 var h = 0
                 while (secondIndex < commands.length) {
@@ -389,10 +393,11 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                         else break
                     secondIndex++
                 }
+                //Условие перехода
                 if (transporter[position] == 0) indexCommands = secondIndex
-                else queueBrackets.add(0, Pair(indexCommands, secondIndex))
+                else queueBrackets.add(0, indexCommands)
             }
-            ']' -> if (transporter[position] != 0) indexCommands = queueBrackets[0].first
+            ']' -> if (transporter[position] != 0) indexCommands = queueBrackets[0]
             else queueBrackets.removeAt(0)
         }
         countCommands++

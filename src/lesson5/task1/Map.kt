@@ -297,14 +297,11 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
         //Воспользуемся поиском в ширину
         val mapFriends = mutableMapOf<String, Boolean>()
         for (i in listFriends) mapFriends[i] = false
-
         val queue = mutableListOf(person) //Очередь поиска
-
         while (queue.isNotEmpty()) {
             val choose = queue[0]
             queue.remove(choose)
             mapFriends[choose] = true
-
             //Проверяем всех тех, с кем дружит человек
             for (friend in friends.getOrDefault(choose, setOf())) {
                 if (friend != person) map[person] = map[person]!! + friend
@@ -337,9 +334,8 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
     val mapIndex = mutableMapOf<Int, Int>()
     for (i in list.indices) {
-        if (list[i] in mapIndex) return Pair(mapIndex.getOrDefault(list[i], 0), i)
-        val second = number - list[i]
-        mapIndex[second] = i
+        if (list[i] in mapIndex) return Pair(mapIndex.getOrDefault(list[i], -1), i)
+        mapIndex[number - list[i]] = i
     }
     return Pair(-1, -1)
 }
@@ -368,18 +364,15 @@ fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
 fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<String> {
     val list = treasures.toList()
     val d = mutableListOf<MutableList<Pair<Int, MutableSet<String>>>>()
-
     for (i in 0..treasures.size) {
         d.add(mutableListOf())
         for (j in 0..capacity) d[i].add(Pair(0, mutableSetOf()))
     }
-
     for (count in 1..treasures.size)
         for (weight in 0..capacity) {
             val w = list[count - 1].second.first
             val price = list[count - 1].second.second
             val treas = list[count - 1].first
-
             when {
                 w > weight -> d[count][weight] = d[count - 1][weight]
                 d[count - 1][weight - w].first + price > d[count - 1][weight].first ->
@@ -390,6 +383,5 @@ fun bagPacking(treasures: Map<String, Pair<Int, Int>>, capacity: Int): Set<Strin
                 else -> d[count][weight] = d[count - 1][weight]
             }
         }
-
     return d[treasures.size][capacity].second
 }
