@@ -242,17 +242,13 @@ fun mostExpensive(description: String): String {
     var mostExpName = ""
     val list = description.split("; ")
     for (i in list) {
-        try {
-            val num = i.split(' ')[1].toDoubleOrNull()
-            require((num != null) && (num >= 0.0))
-            if (mostExp < num) {
-                mostExp = num
-                mostExpName = i.split(' ')[0]
-            }
-        } catch (e: IndexOutOfBoundsException) {
-            return ""
-        } catch (e: NumberFormatException) {
-            return ""
+        val parts = i.split(' ')
+        if (parts.size != 2) return ""
+        val num = parts[1].toDoubleOrNull()
+        if ((num == null) || (num < 0.0)) return ""
+        if (mostExp < num) {
+            mostExp = num
+            mostExpName = parts[0]
         }
     }
     return mostExpName
