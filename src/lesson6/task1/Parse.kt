@@ -127,7 +127,7 @@ fun dateDigitToStr(digital: String): String {
  */
 
 fun flattenPhoneNumber(phone: String): String =
-    if (!Regex("""^(\+\d+)?[\s-]*(\(([\s-]*\d+[\s-]*)+\))?([\s-]*\d+[\s-]*)*$""").matches(phone))
+    if (!Regex("""^(\+\d+)?(\(\d+\))?\d+$""").matches(Regex("""[\s-]""").replace(phone, "")))
         "" else Regex("""[\s-()]""").replace(phone, "")
 
 /**
@@ -168,9 +168,8 @@ fun bestLongJump(jumps: String): Int {
  */
 fun bestHighJump(jumps: String): Int {
     val correctChars = setOf('+', '%', '-')
-    val set = jumps.toSet() - correctChars - ' '
     val parts = jumps.split(' ')
-    if ((!set.all { it in '0'..'9' }) || (parts.size % 2 != 0)) return -1
+    if (parts.size % 2 != 0) return -1
     var bestResult = -1
     for (i in parts.indices step 2) {
         val result = parts[i].toIntOrNull() ?: return -1
@@ -349,8 +348,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     var countCommands = 0
     var indexCommands = 0
     val queueBrackets = mutableListOf<Int>()
-    val transporter = mutableListOf<Int>()
-    for (i in 0 until cells) transporter.add(0)
+    val transporter = MutableList(cells) {0}
     //Основная логика функции
     while ((countCommands < limit) && (indexCommands < commands.length)) {
         when (commands[indexCommands]) {
