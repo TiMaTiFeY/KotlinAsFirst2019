@@ -245,7 +245,7 @@ fun mostExpensive(description: String): String {
         try {
             val num = i.split(' ')[1].toDoubleOrNull()
             require((num != null) && (num >= 0.0))
-            if  (mostExp < num) {
+            if (mostExp < num) {
                 mostExp = num
                 mostExpName = i.split(' ')[0]
             }
@@ -381,10 +381,10 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
                 }
                 //Условие перехода
                 if (transporter[position] == 0) indexCommands = secondIndex
-                else queueBrackets.add(0, indexCommands)
+                else queueBrackets.add(indexCommands)
             }
-            ']' -> if (transporter[position] != 0) indexCommands = queueBrackets[0]
-            else queueBrackets.removeAt(0)
+            ']' -> if (transporter[position] != 0) indexCommands = queueBrackets.last()
+            else queueBrackets.removeAt(queueBrackets.size - 1)
         }
         countCommands++
         indexCommands++
