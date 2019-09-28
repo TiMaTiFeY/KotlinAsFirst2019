@@ -348,7 +348,7 @@ fun computeDeviceCells(cells: Int, commands: String, limit: Int): List<Int> {
     var countCommands = 0
     var indexCommands = 0
     val queueBrackets = mutableListOf<Int>()
-    val transporter = MutableList(cells) {0}
+    val transporter = MutableList(cells) { 0 }
     //Основная логика функции
     while ((countCommands < limit) && (indexCommands < commands.length)) {
         when (commands[indexCommands]) {
