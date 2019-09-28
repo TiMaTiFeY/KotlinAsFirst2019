@@ -219,9 +219,9 @@ fun plusMinus(expression: String): Int {
 fun firstDuplicateIndex(str: String): Int {
     val list = str.split(' ')
     var index = 0
-    for (pair in list.zipWithNext()) {
-        if (pair.first.toLowerCase() == pair.second.toLowerCase()) return index
-        index += pair.first.length + 1
+    for ((first, second) in list.zipWithNext()) {
+        if (first.toLowerCase() == second.toLowerCase()) return index
+        index += first.length + 1
     }
     return -1
 }
