@@ -87,7 +87,12 @@ fun sibilants(inputName: String, outputName: String) {
             it.write(line[0].toString())
             for (i in 1 until line.length)
                 if ((line[i - 1].toLowerCase() in set) && (line[i].toLowerCase() in map))
-                    it.write(if (line[i] in map) map[line[i]] else map[line[i].toLowerCase()]!!.toUpperCase())
+                    it.write(
+                        map.getOrDefault(
+                            line[i],
+                            map.getOrDefault(line[i].toLowerCase(), "").toUpperCase()
+                        )
+                    )
                 else it.write(line[i].toString())
             it.newLine()
         }
@@ -112,22 +117,7 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    var maxLen = 0
-    for (line in File(inputName).readLines()) maxLen = kotlin.math.max(maxLen, line.length)
-    println(maxLen)
-    File(outputName).bufferedWriter().use {
-        for (line in File(inputName).readLines()){
-            val len = (maxLen + line.length) / 2
-            println(len)
-
-            val newStr = String.format("%${len}s", line.trim())
-            println(line)
-            println(newStr)
-            println()
-            it.write(newStr)
-        }
-        it.newLine()
-    }
+    TODO()
 }
 
 /**

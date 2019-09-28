@@ -80,15 +80,13 @@ val months = listOf(
 
 fun dateStrToDigit(str: String): String {
     val parts = str.split(" ")
-    try {
-        val month = if (parts[1] in months) months.indexOf(parts[1]) + 1 else return ""
-        val day = parts[0].toInt()
-        val year = parts[2].toInt()
-        if ((day < 1) || (year < 0) || (day > daysInMonth(month, year))) return ""
-        return "%02d.%02d.%d".format(day, month, year)
-    } catch (e: Exception) {
-        return ""
-    }
+    if (parts.size != 3) return ""
+    val ind = months.indexOf(parts[1])
+    val month = if (ind != -1) ind + 1 else return ""
+    val day = parts[0].toIntOrNull()
+    val year = parts[2].toIntOrNull()
+    if ((day == null) || (year == null) || (day < 1) || (year < 0) || (day > daysInMonth(month, year))) return ""
+    return "%02d.%02d.%d".format(day, month, year)
 }
 
 /**
@@ -104,16 +102,13 @@ fun dateStrToDigit(str: String): String {
 fun dateDigitToStr(digital: String): String {
     val parts = digital.split(".")
     if (parts.size != 3) return ""
-    try {
-        val day = parts[0].toInt()
-        val month = parts[1].toInt()
-        if (month !in 1..12) return ""
-        val year = parts[2].toInt()
-        if ((day < 1) || (year < 0) || (day > daysInMonth(month, year))) return ""
-        return "$day ${months[month - 1]} $year"
-    } catch (e: Exception) {
-        return ""
-    }
+    val day = parts[0].toIntOrNull()
+    val month = parts[1].toIntOrNull()
+    val year = parts[2].toIntOrNull()
+    if ((day == null) || (year == null) || (month == null) ||
+        (month !in 1..12) || (day < 1) || (year < 0) || (day > daysInMonth(month, year))
+    ) return ""
+    return "$day ${months[month - 1]} $year"
 }
 
 /**
@@ -131,18 +126,9 @@ fun dateDigitToStr(digital: String): String {
  * PS: Дополнительные примеры работы функции можно посмотреть в соответствующих тестах.
  */
 
-fun flattenPhoneNumber(phone: String): String {
-    val parts = phone.replace(" ", "").replace("-", "")
-    val setPhone = parts.toSet() - '+' - '(' - ')'
-    if (!setPhone.all { it in '0'..'9' }) return ""
-    if (('+' in parts.toSet()) && (parts[0] != '+')) return ""
-    val s = parts.split("(")
-    return if (s.size != 1)
-        if ((')' in s[1]) && (s.size == 2) && (s[1][0] != ')'))
-            parts.replace("(", "").replace(")", "")
-        else ""
-    else parts
-}
+fun flattenPhoneNumber(phone: String): String =
+    if (!Regex("""(\+\d+)?(\s*|-*)*(\(((\s*|-*)*\d+(\s*|-*)*)+\))?((\s*|-*)*\d+(\s*|-*)*)*""").matches(phone))
+        "" else Regex("""\s|-|\(|\)""").replace(phone, "")
 
 /**
  * Средняя
@@ -156,17 +142,17 @@ fun flattenPhoneNumber(phone: String): String {
  */
 fun bestLongJump(jumps: String): Int {
     val parts = jumps.split(" ")
-    var maxJump: Int? = null
+    var maxJump = -1
     for (i in parts) {
         if ((i != "%") && (i != "-"))
             try {
-                val n = i.toInt()
-                maxJump = if (maxJump == null) n else kotlin.math.max(maxJump, n)
+                val n = i.toIntOrNull() ?: return -1
+                maxJump = kotlin.math.max(maxJump, n)
             } catch (e: NumberFormatException) {
                 return -1
             }
     }
-    return maxJump ?: -1
+    return maxJump
 }
 
 /**
@@ -186,14 +172,10 @@ fun bestHighJump(jumps: String): Int {
     val parts = jumps.split(' ')
     if ((!set.all { it in '0'..'9' }) || (parts.size % 2 != 0)) return -1
     var bestResult = -1
-    for (i in 0..parts.size / 2 step 2) {
-        try {
-            val result = parts[i].toInt()
-            if (!parts[i + 1].toSet().all { it in correctChars }) return -1
-            if ('+' in parts[i + 1]) bestResult = kotlin.math.max(bestResult, result)
-        } catch (e: NumberFormatException) {
-            return -1
-        }
+    for (i in parts.indices step 2) {
+        val result = parts[i].toIntOrNull() ?: return -1
+        if (!parts[i + 1].all { it in correctChars }) return -1
+        if ('+' in parts[i + 1]) bestResult = kotlin.math.max(bestResult, result)
     }
     return bestResult
 }
@@ -212,11 +194,11 @@ fun plusMinus(expression: String): Int {
     require(list[0] != "")
     var res = 0
     var mark = 1
-    for (i in list.indices) {
-        if (i % 2 == 0) {
-            require(list[i].toSet().all { it in '0'..'9' })
-            res += list[i].toInt() * mark
-        } else mark = when (list[i]) {
+    for ((ind, element) in list.withIndex()) {
+        if (ind % 2 == 0) {
+            require(element.all { it in '0'..'9' })
+            res += element.toInt() * mark
+        } else mark = when (element) {
             "+" -> 1
             "-" -> -1
             else -> throw IllegalArgumentException()
@@ -237,9 +219,9 @@ fun plusMinus(expression: String): Int {
 fun firstDuplicateIndex(str: String): Int {
     val list = str.split(' ')
     var index = 0
-    for (i in 0..list.size - 2) {
-        if (list[i].toLowerCase() == list[i + 1].toLowerCase()) return index
-        index += list[i].length + 1
+    for (pair in list.zipWithNext()) {
+        if (pair.first.toLowerCase() == pair.second.toLowerCase()) return index
+        index += pair.first.length + 1
     }
     return -1
 }
@@ -256,14 +238,14 @@ fun firstDuplicateIndex(str: String): Int {
  * Все цены должны быть больше либо равны нуля.
  */
 fun mostExpensive(description: String): String {
-    var mostExp: Double? = null
-    var mostExpName: String? = null
+    var mostExp = -1.0
+    var mostExpName = ""
     val list = description.split("; ")
     for (i in list) {
         try {
-            val num = i.split(' ')[1].toDouble()
-            require(num >= 0.0)
-            if ((mostExp == null) || (mostExp < num)) {
+            val num = i.split(' ')[1].toDoubleOrNull()
+            require((num != null) && (num >= 0.0))
+            if  (mostExp < num) {
                 mostExp = num
                 mostExpName = i.split(' ')[0]
             }
@@ -273,7 +255,7 @@ fun mostExpensive(description: String): String {
             return ""
         }
     }
-    return mostExpName ?: ""
+    return mostExpName
 }
 
 /**
@@ -298,6 +280,7 @@ fun fromRoman(roman: String): Int {
     if (roman == "") return -1
     var startIndex = 0
     var endIndex = 0
+    var previewNum = 1001
     while (startIndex < roman.length) {
         var wasIn = false
         while (roman.substring(startIndex, endIndex + 1) in d) {
@@ -306,7 +289,10 @@ fun fromRoman(roman: String): Int {
             if (endIndex == roman.length) break
         }
         if (!wasIn) return -1
-        res += d.getOrDefault(roman.substring(startIndex, endIndex), 0)
+        val newNum = d.getOrDefault(roman.substring(startIndex, endIndex), 0)
+        if (newNum > previewNum) return -1
+        res += newNum
+        previewNum = newNum
         startIndex = endIndex
     }
     return res
