@@ -3,6 +3,7 @@
 package lesson7.task1
 
 import java.io.File
+import kotlin.math.max
 
 /**
  * Пример
@@ -55,13 +56,17 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
  */
 fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
     val map = mutableMapOf<String, Int>()
-    val newList = substrings.toSet().toList()
+    val newList = substrings.toSet()
     for (str in newList) map[str] = 0
     for (line in File(inputName).readLines())
         for (str in newList) {
-            val size = str.length
-            for (i in 0..line.length - size)
-                if (line.substring(i, i + size).toLowerCase() == str.toLowerCase()) map[str] = map[str]!! + 1
+            var searchIndex = 0
+            val lowerString = line.toLowerCase()
+            val strFind = str.toLowerCase()
+            while (lowerString.indexOf(strFind, searchIndex) != -1) {
+                map[str] = map[str]!! + 1
+                searchIndex = lowerString.indexOf(strFind, searchIndex) + 1
+            }
         }
     return map
 }
@@ -118,7 +123,19 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    TODO()
+    val text = mutableListOf<String>()
+    var maxLen = 0
+    for (line in File(inputName).readLines()) {
+        text.add(line.trim())
+        maxLen = max(maxLen, line.length)
+    }
+    File(outputName).bufferedWriter().use {
+        for (line in text) {
+            val currentLen = line.length
+            val res = String.format("%${(maxLen + currentLen) / 2}s", line) + "\n"
+            it.write(res)
+        }
+    }
 }
 
 /**
@@ -149,7 +166,34 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    TODO()
+    val text = mutableListOf<List<String>>()
+    val lenghtLines = mutableListOf<Int>()
+    var maxLen = 0
+    for (line in File(inputName).readLines()) {
+        val res = line.trim().split(" ").filter { it != "" }
+        var lenWords = res.fold(0) { preview, it -> preview + it.length }
+        if (lenWords != 0) lenWords += (res.size - 1)
+        lenghtLines.add(lenWords)
+        maxLen = max(maxLen, lenWords)
+        if (res.isEmpty()) text.add(listOf("")) else text.add(res)
+    }
+    File(outputName).bufferedWriter().use {
+        for ((index, line) in text.withIndex()) {
+            if (line.size == 1) {
+                it.write(line[0] + "\n")
+                continue
+            }
+            val dif = maxLen - lenghtLines[index]
+            val countPosSpaces = line.size - 1
+            val divSpaces = dif / countPosSpaces
+            var modSpaces = dif % countPosSpaces
+            for (i in 0..line.size - 2) {
+                it.write(line[i] + " ".repeat(divSpaces + 1 + if (modSpaces > 0) 1 else 0))
+                modSpaces--
+            }
+            it.write(line.last() + "\n")
+        }
+    }
 }
 
 /**
@@ -170,7 +214,14 @@ fun alignFileByWidth(inputName: String, outputName: String) {
  * Ключи в ассоциативном массиве должны быть в нижнем регистре.
  *
  */
-fun top20Words(inputName: String): Map<String, Int> = TODO()
+fun top20Words(inputName: String): Map<String, Int> {
+    val map = mutableMapOf<String, Int>()
+    for (line in File(inputName).readLines()) {
+        val words = Regex("""[^a-zA-zа-яА-ЯёЁ]+""").split(line).map { it.toLowerCase() }.filter { it.isNotEmpty() }
+        for (i in words) map[i] = map.getOrDefault(i, 0) + 1
+    }
+    return map.toList().sortedByDescending { it.second }.subList(0, kotlin.math.min(20, map.size)).toMap()
+}
 
 /**
  * Средняя
@@ -208,7 +259,26 @@ fun top20Words(inputName: String): Map<String, Int> = TODO()
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
-    TODO()
+    File(outputName).bufferedWriter().use {
+        for (line in File(inputName).readLines()) {
+            var str = line
+            for ((key, value) in dictionary) {
+                var previewIndexSwap = -1
+                var index = str.indexOf(key, ignoreCase = true)
+                while ((index != -1) && (previewIndexSwap != index)) {
+                    previewIndexSwap = index
+                    str = if (str[index].isUpperCase())
+                        str.replaceFirst(
+                            key.toString().toUpperCase()!!,
+                            (value[0].toUpperCase() + value.substring(1, value.length).toLowerCase())!!
+                        )
+                    else str.replaceFirst(key.toString()!!, value.toLowerCase()!!, true)
+                    index = str.indexOf(key, ignoreCase = true)
+                }
+            }
+            it.write(str + "\n")
+        }
+    }
 }
 
 /**
@@ -236,7 +306,19 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun chooseLongestChaoticWord(inputName: String, outputName: String) {
-    TODO()
+    val res = mutableListOf<String>()
+    var maxLen = 0
+    for (line in File(inputName).readLines()) {
+        val str = line.toLowerCase()
+        if (str.toSet().size == str.length) {
+            if (str.length > maxLen) {
+                maxLen = str.length
+                res.clear()
+                res.add(line)
+            } else if (str.length == maxLen) res.add(line)
+        }
+    }
+    File(outputName).bufferedWriter().use { it.write(res.joinToString(", ")) }
 }
 
 /**
@@ -285,7 +367,17 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
+    var res = ""
+    val text = File(inputName).readText()
+    val str = Regex("""(.+\r?\n)+\r?\n""").findAll(text)
+    for (el in str)
+        res += "<p>\n" + el.groupValues[0].substring(0, el.groupValues[0].length - 1) + "</p>\n"
+    res += "<p>\n" + Regex(""".+${'$'}""").find(text)?.value + "\n</p>\n"
+    res = Regex("""\*\*[^*]+\*\*""").replace(res) { "<b>" + it.value.substring(2, it.value.length - 2) + "</b>" }
+    res = Regex("""~~[^~]+~~""").replace(res) { "<s>" + it.value.substring(2, it.value.length - 2) + "</s>" }
+    res = Regex("""\*[^*]+\*""").replace(res) { "<i>" + it.value.substring(1, it.value.length - 1) + "</i>" }
+    res = "<html>\n<body>\n$res</body>\n</html>"
+    File(outputName).bufferedWriter().use { it.write(res) }
 }
 
 /**
