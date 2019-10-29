@@ -60,12 +60,12 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
     for (str in newList) map[str] = 0
     for (line in File(inputName).readLines())
         for (str in newList) {
-            var searchIndex = 0
             val lowerString = line.toLowerCase()
             val strFind = str.toLowerCase()
-            while (lowerString.indexOf(strFind, searchIndex) != -1) {
+            var indexRes = lowerString.indexOf(strFind, 0)
+            while (indexRes != -1) {
                 map[str] = map[str]!! + 1
-                searchIndex = lowerString.indexOf(strFind, searchIndex) + 1
+                indexRes += 1
             }
         }
     return map
@@ -126,8 +126,9 @@ fun centerFile(inputName: String, outputName: String) {
     val text = mutableListOf<String>()
     var maxLen = 0
     for (line in File(inputName).readLines()) {
-        text.add(line.trim())
-        maxLen = max(maxLen, line.length)
+        val newLine = line.trim()
+        text.add(newLine)
+        maxLen = max(maxLen, newLine.length)
     }
     File(outputName).bufferedWriter().use {
         for (line in text) {
@@ -220,7 +221,7 @@ fun top20Words(inputName: String): Map<String, Int> {
         val words = Regex("""[^a-zA-zа-яА-ЯёЁ]+""").split(line).map { it.toLowerCase() }.filter { it.isNotEmpty() }
         for (i in words) map[i] = map.getOrDefault(i, 0) + 1
     }
-    return map.toList().sortedByDescending { it.second }.subList(0, kotlin.math.min(20, map.size)).toMap()
+    return map.toList().sortedByDescending { it.second }.take(kotlin.math.min(20, map.size)).toMap()
 }
 
 /**
@@ -259,22 +260,25 @@ fun top20Words(inputName: String): Map<String, Int> {
  * Обратите внимание: данная функция не имеет возвращаемого значения
  */
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
+    val newDictionary = mutableMapOf<Char, String>()
+    for ((key, value) in dictionary) newDictionary[key.toLowerCase()] = value.toLowerCase()
     File(outputName).bufferedWriter().use {
         for (line in File(inputName).readLines()) {
             var str = line
-            for ((key, value) in dictionary) {
-                var previewIndexSwap = -1
-                var index = str.indexOf(key, ignoreCase = true)
-                while ((index != -1) && (previewIndexSwap != index)) {
-                    previewIndexSwap = index
-                    str = if (str[index].isUpperCase())
-                        str.replaceFirst(
-                            key.toString().toUpperCase()!!,
-                            (value[0].toUpperCase() + value.substring(1, value.length).toLowerCase())!!
-                        )
-                    else str.replaceFirst(key.toString()!!, value.toLowerCase()!!, true)
-                    index = str.indexOf(key, ignoreCase = true)
+            var indexOfChar = 0
+            var lengthOfString = str.length
+            while (indexOfChar < lengthOfString) {
+                val symbol = str[indexOfChar]
+                if (symbol.toLowerCase() in newDictionary) {
+                    var changeString = newDictionary.getOrDefault(symbol.toLowerCase(), "")
+                    if (symbol.isUpperCase()) changeString =
+                        changeString[0].toString().toUpperCase() + changeString.substring(1, changeString.length)
+                    str = str.replaceRange(indexOfChar, indexOfChar + 1, changeString)
+                    val dif = newDictionary.getOrDefault(symbol.toLowerCase(), "").length - 1
+                    indexOfChar += dif
+                    lengthOfString += dif
                 }
+                indexOfChar += 1
             }
             it.write(str + "\n")
         }
@@ -367,16 +371,15 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    var res = ""
-    val text = File(inputName).readText()
-    val str = Regex("""(.+\r?\n)+\r?\n""").findAll(text)
+    var res = "<html>\n<body>\n"
+    val text = File(inputName).readText().replace("\r", "")
+    val str = text.split("\n\n")
     for (el in str)
-        res += "<p>\n" + el.groupValues[0].substring(0, el.groupValues[0].length - 1) + "</p>\n"
-    res += "<p>\n" + Regex(""".+${'$'}""").find(text)?.value + "\n</p>\n"
+        res += "<p>\n$el\n</p>\n"
     res = Regex("""\*\*[^*]+\*\*""").replace(res) { "<b>" + it.value.substring(2, it.value.length - 2) + "</b>" }
     res = Regex("""~~[^~]+~~""").replace(res) { "<s>" + it.value.substring(2, it.value.length - 2) + "</s>" }
     res = Regex("""\*[^*]+\*""").replace(res) { "<i>" + it.value.substring(1, it.value.length - 1) + "</i>" }
-    res = "<html>\n<body>\n$res</body>\n</html>"
+    res += "</body>\n</html>"
     File(outputName).bufferedWriter().use { it.write(res) }
 }
 

@@ -73,7 +73,6 @@ Basic, Ruby, Swift.
             countSubstrings("input/substrings_in2.txt", listOf("--", "ее", "животное", "."))
         )
     }
-
     @Test
     @Tag("Normal")
     fun sibilants() {
