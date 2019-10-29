@@ -192,19 +192,12 @@ Basic, Ruby, Swift.
     fun transliterate() {
         transliterate(
             "input/trans_in1.txt",
-            mapOf('з' to "zz", 'р' to "r", 'д' to "d", 'й' to "y", 'М' to "m", 'и' to "yy", '!' to "!!!"),
+            mapOf('L' to ""),
             "temp.txt"
         )
-        assertFileContent("temp.txt", "Zzdrавствуy,\nmyyr!!!")
+        assertFileContent("temp.txt", "")
         File("temp.txt").delete()
 
-        transliterate(
-            "input/trans_in1.txt",
-            mapOf('з' to "zZ", 'р' to "r", 'д' to "d", 'й' to "y", 'М' to "m", 'и' to "YY", '!' to "!!!"),
-            "temp.txt"
-        )
-        assertFileContent("temp.txt", "Zzdrавствуy,\nmyyr!!!")
-        File("temp.txt").delete()
     }
 
     @Test
@@ -242,6 +235,7 @@ Basic, Ruby, Swift.
     fun markdownToHtmlSimple() {
         markdownToHtmlSimple("input/markdown_simple.md", "temp.html")
         checkHtmlSimpleExample()
+
     }
 
     private fun checkHtmlListsExample() {

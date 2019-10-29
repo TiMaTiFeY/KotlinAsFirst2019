@@ -60,12 +60,14 @@ fun countSubstrings(inputName: String, substrings: List<String>): Map<String, In
     for (str in newList) map[str] = 0
     for (line in File(inputName).readLines())
         for (str in newList) {
+            var searchIndex = 0
             val lowerString = line.toLowerCase()
             val strFind = str.toLowerCase()
-            var indexRes = lowerString.indexOf(strFind, 0)
-            while (indexRes != -1) {
+            var ind = lowerString.indexOf(strFind, searchIndex)
+            while (ind != -1) {
                 map[str] = map[str]!! + 1
-                indexRes += 1
+                searchIndex = ind + 1
+                ind = lowerString.indexOf(strFind, searchIndex)
             }
         }
     return map
@@ -135,6 +137,7 @@ fun centerFile(inputName: String, outputName: String) {
             val currentLen = line.length
             val res = String.format("%${(maxLen + currentLen) / 2}s", line) + "\n"
             it.write(res)
+            print(res)
         }
     }
 }
@@ -271,7 +274,7 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
                 val symbol = str[indexOfChar]
                 if (symbol.toLowerCase() in newDictionary) {
                     var changeString = newDictionary.getOrDefault(symbol.toLowerCase(), "")
-                    if (symbol.isUpperCase()) changeString =
+                    if (changeString.isNotEmpty() && symbol.isUpperCase()) changeString =
                         changeString[0].toString().toUpperCase() + changeString.substring(1, changeString.length)
                     str = str.replaceRange(indexOfChar, indexOfChar + 1, changeString)
                     val dif = newDictionary.getOrDefault(symbol.toLowerCase(), "").length - 1
@@ -371,6 +374,8 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
+    TODO()
+    /*
     var res = "<html>\n<body>\n"
     val text = File(inputName).readText().replace("\r", "")
     val str = text.split("\n\n")
@@ -381,6 +386,8 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     res = Regex("""\*[^*]+\*""").replace(res) { "<i>" + it.value.substring(1, it.value.length - 1) + "</i>" }
     res += "</body>\n</html>"
     File(outputName).bufferedWriter().use { it.write(res) }
+    print(res)
+     */
 }
 
 /**
