@@ -265,27 +265,23 @@ fun top20Words(inputName: String): Map<String, Int> {
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
     val newDictionary = mutableMapOf<Char, String>()
     for ((key, value) in dictionary) newDictionary[key.toLowerCase()] = value.toLowerCase()
-    File(outputName).bufferedWriter().use {
-        for (line in File(inputName).readLines()) {
-            var str = line
-            var indexOfChar = 0
-            var lengthOfString = str.length
-            while (indexOfChar < lengthOfString) {
-                val symbol = str[indexOfChar]
-                if (symbol.toLowerCase() in newDictionary) {
-                    var changeString = newDictionary.getOrDefault(symbol.toLowerCase(), "")
-                    if (changeString.isNotEmpty() && symbol.isUpperCase()) changeString =
-                        changeString[0].toString().toUpperCase() + changeString.substring(1, changeString.length)
-                    str = str.replaceRange(indexOfChar, indexOfChar + 1, changeString)
-                    val dif = newDictionary.getOrDefault(symbol.toLowerCase(), "").length - 1
-                    indexOfChar += dif
-                    lengthOfString += dif
-                }
-                indexOfChar += 1
-            }
-            it.write(str + "\n")
+    var text = File(inputName).readText()
+    var indexOfChar = 0
+    var lengthOfText = text.length
+    while (indexOfChar < lengthOfText) {
+        val symbol = text[indexOfChar]
+        if (symbol.toLowerCase() in newDictionary) {
+            var changeString = newDictionary.getOrDefault(symbol.toLowerCase(), "")
+            if (changeString.isNotEmpty() && symbol.isUpperCase()) changeString =
+                changeString[0].toString().toUpperCase() + changeString.substring(1, changeString.length)
+            text = text.replaceRange(indexOfChar, indexOfChar + 1, changeString)
+            val dif = newDictionary.getOrDefault(symbol.toLowerCase(), "").length - 1
+            indexOfChar += dif
+            lengthOfText += dif
         }
+        indexOfChar += 1
     }
+    File(outputName).bufferedWriter().use { it.write(text) }
 }
 
 /**
@@ -374,8 +370,7 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()
-    /*
+    TODO()/*
     var res = "<html>\n<body>\n"
     val text = File(inputName).readText().replace("\r", "")
     val str = text.split("\n\n")
@@ -387,7 +382,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     res += "</body>\n</html>"
     File(outputName).bufferedWriter().use { it.write(res) }
     print(res)
-     */
+    */
 }
 
 /**
