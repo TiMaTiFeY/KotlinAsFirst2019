@@ -224,7 +224,7 @@ fun top20Words(inputName: String): Map<String, Int> {
         val words = Regex("""[^a-zA-zа-яА-ЯёЁ]+""").split(line).map { it.toLowerCase() }.filter { it.isNotEmpty() }
         for (i in words) map[i] = map.getOrDefault(i, 0) + 1
     }
-    return map.toList().sortedByDescending { it.second }.take(kotlin.math.min(20, map.size)).toMap()
+    return map.toList().sortedByDescending { it.second }.take(20).toMap()
 }
 
 /**
@@ -265,23 +265,16 @@ fun top20Words(inputName: String): Map<String, Int> {
 fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: String) {
     val newDictionary = mutableMapOf<Char, String>()
     for ((key, value) in dictionary) newDictionary[key.toLowerCase()] = value.toLowerCase()
-    var text = File(inputName).readText()
-    var indexOfChar = 0
-    var lengthOfText = text.length
-    while (indexOfChar < lengthOfText) {
-        val symbol = text[indexOfChar]
-        if (symbol.toLowerCase() in newDictionary) {
-            var changeString = newDictionary.getOrDefault(symbol.toLowerCase(), "")
-            if (changeString.isNotEmpty() && symbol.isUpperCase()) changeString =
-                changeString[0].toString().toUpperCase() + changeString.substring(1, changeString.length)
-            text = text.replaceRange(indexOfChar, indexOfChar + 1, changeString)
-            val dif = newDictionary.getOrDefault(symbol.toLowerCase(), "").length - 1
-            indexOfChar += dif
-            lengthOfText += dif
+    File(outputName).bufferedWriter().use {
+        for (char in File(inputName).readText()) {
+            var changeString = char.toString()
+            if (char.toLowerCase() in newDictionary) {
+                changeString = newDictionary.getOrDefault(char.toLowerCase(), "")
+                if (char.isUpperCase()) changeString = changeString.capitalize()
+            }
+            it.write(changeString)
         }
-        indexOfChar += 1
     }
-    File(outputName).bufferedWriter().use { it.write(text) }
 }
 
 /**
