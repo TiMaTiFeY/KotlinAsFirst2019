@@ -2,7 +2,6 @@
 
 package lesson7.task1
 
-import kotlinx.html.currentTimeMillis
 import java.io.File
 import kotlin.math.max
 
@@ -268,12 +267,8 @@ fun transliterate(inputName: String, dictionary: Map<Char, String>, outputName: 
     for ((key, value) in dictionary) newDictionary[key.toLowerCase()] = value.toLowerCase()
     File(outputName).bufferedWriter().use {
         for (char in File(inputName).readText()) {
-            var changeString = char.toString()
-            if (char.toLowerCase() in newDictionary) {
-                changeString = newDictionary.getOrDefault(char.toLowerCase(), "")
-                if (char.isUpperCase()) changeString = changeString.capitalize()
-            }
-            it.write(changeString)
+            val changeString = newDictionary[char.toLowerCase()] ?: char.toString()
+            it.write(if (char.isUpperCase()) changeString.capitalize() else changeString)
         }
     }
 }
@@ -363,72 +358,56 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
-fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    val map = mutableMapOf<String, Int?>("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
-    val text = File(inputName).readText().replace("\r", "")
-    val textList = mutableListOf<String>("<html><body>", "<p>")
-    var currentString = ""
-    var i = 0
-    while (i < text.length) {
-        if (text[i] == '*') if (i < text.length - 1 && text[i + 1] == '*') {
-            i += 2
-            if (currentString.isNotEmpty()) textList.add(currentString)
-            currentString = ""
-            if (map["**"] == null) {
-                map["**"] = textList.size
-                textList.add("**")
-            } else {
-                textList.add("</b>")
-                textList[map["**"]!!] = "<b>"
-                map["**"] = null
-            }
+var textList = mutableListOf("<html><body>", "<p>")
+val map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+var currentString = ""
+var i = 0
+var text = ""
+
+fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
+    if (text[i] == mark[0]) {
+        if (mark.length == 2) if (i < text.length - 1 && text[i + 1] == mark[1]) i += 1 else return false
+        if (currentString.isNotEmpty()) textList.add(currentString)
+        currentString = ""
+        if (map[mark] == null) {
+            map[mark] = textList.size
+            textList.add(mark)
         } else {
-            i += 1
-            if (currentString.isNotEmpty()) textList.add(currentString)
-            currentString = ""
-            if (map["*"] == null) {
-                map["*"] = textList.size
-                textList.add("*")
-            } else {
-                textList.add("</i>")
-                textList[map["*"]!!] = "<i>"
-                map["*"] = null
+            textList.add(tags.second)
+            textList[map[mark]!!] = tags.first
+            map[mark] = null
+            if (mark == "\n\n") {
+                map[mark] = textList.size
+                textList.add("")
             }
-        } else
-        if (text[i] == '~' && i < text.length - 1 && text[i + 1] == '~') {
-            i += 2
-            if (currentString.isNotEmpty()) textList.add(currentString)
-            currentString = ""
-            if (map["~~"] == null) {
-                map["~~"] = textList.size
-                textList.add("~~")
-            } else {
-                textList.add("</s>")
-                textList[map["~~"]!!] = "<s>"
-                map["~~"] = null
-            }
-        } else
-        if (text[i] == '\n' && i < text.length - 1 && text[i + 1] == '\n') {
-            i += 2
-            if (currentString.isNotEmpty()) textList.add(currentString)
-            currentString = ""
-            if (map["\n\n"] == null) {
-                map["\n\n"] = textList.size
-                textList.add("\n\n")
-            } else {
-                textList.add("</p>")
-                textList[map["\n\n"]!!] = "<p>"
-                map["\n\n"] = textList.size
-                textList.add("\n\n")
-            }
-        } else i += 1
-        if (i < text.length) currentString += text[i]
+        }
+        return true
     }
-    if (map["\n\n"]!! != null) textList.add("</p>")
+    return false
+}
+
+fun markdownToHtmlSimple(inputName: String, outputName: String) {
+    text = File(inputName).readText().replace("\r", "")
+    currentString = ""
+    i = 0
+    while (i < text.length) {
+        var flag = false
+        flag =  flag || checkMarkToHTML("**", "<b>" to "</b>")
+        if (!flag) flag =  flag || checkMarkToHTML("*", "<i>" to "</i>")
+        if (!flag) flag =  flag || checkMarkToHTML("~~", "<s>" to "</s>")
+        if (!flag) flag =  flag || checkMarkToHTML("\n\n", "<p>" to "</p>")
+        if (i < text.length && !flag) currentString += text[i]
+        i += 1
+    }
+    textList.add(currentString)
+    val lastP = map["\n\n"]
+    if (lastP != null) {
+        textList[lastP] = "<p>"
+        textList.add("</p>")
+    }
     textList.add("</body></html>")
     val res = textList.joinToString(separator = "")
-    println(res)
-    File(outputName).bufferedWriter().use { res }
+    File(outputName).bufferedWriter().use { it.write(res) }
 }
 
 /**
