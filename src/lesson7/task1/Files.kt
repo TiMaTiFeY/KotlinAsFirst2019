@@ -2,6 +2,7 @@
 
 package lesson7.task1
 
+import kotlinx.html.currentTimeMillis
 import java.io.File
 import kotlin.math.max
 
@@ -363,19 +364,71 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    TODO()/*
-    var res = "<html>\n<body>\n"
+    val map = mutableMapOf<String, Int?>("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
     val text = File(inputName).readText().replace("\r", "")
-    val str = text.split("\n\n")
-    for (el in str)
-        res += "<p>\n$el\n</p>\n"
-    res = Regex("""\*\*[^*]+\*\*""").replace(res) { "<b>" + it.value.substring(2, it.value.length - 2) + "</b>" }
-    res = Regex("""~~[^~]+~~""").replace(res) { "<s>" + it.value.substring(2, it.value.length - 2) + "</s>" }
-    res = Regex("""\*[^*]+\*""").replace(res) { "<i>" + it.value.substring(1, it.value.length - 1) + "</i>" }
-    res += "</body>\n</html>"
-    File(outputName).bufferedWriter().use { it.write(res) }
-    print(res)
-    */
+    val textList = mutableListOf<String>("<html><body>", "<p>")
+    var currentString = ""
+    var i = 0
+    while (i < text.length) {
+        if (text[i] == '*') if (i < text.length - 1 && text[i + 1] == '*') {
+            i += 2
+            if (currentString.isNotEmpty()) textList.add(currentString)
+            currentString = ""
+            if (map["**"] == null) {
+                map["**"] = textList.size
+                textList.add("**")
+            } else {
+                textList.add("</b>")
+                textList[map["**"]!!] = "<b>"
+                map["**"] = null
+            }
+        } else {
+            i += 1
+            if (currentString.isNotEmpty()) textList.add(currentString)
+            currentString = ""
+            if (map["*"] == null) {
+                map["*"] = textList.size
+                textList.add("*")
+            } else {
+                textList.add("</i>")
+                textList[map["*"]!!] = "<i>"
+                map["*"] = null
+            }
+        } else
+        if (text[i] == '~' && i < text.length - 1 && text[i + 1] == '~') {
+            i += 2
+            if (currentString.isNotEmpty()) textList.add(currentString)
+            currentString = ""
+            if (map["~~"] == null) {
+                map["~~"] = textList.size
+                textList.add("~~")
+            } else {
+                textList.add("</s>")
+                textList[map["~~"]!!] = "<s>"
+                map["~~"] = null
+            }
+        } else
+        if (text[i] == '\n' && i < text.length - 1 && text[i + 1] == '\n') {
+            i += 2
+            if (currentString.isNotEmpty()) textList.add(currentString)
+            currentString = ""
+            if (map["\n\n"] == null) {
+                map["\n\n"] = textList.size
+                textList.add("\n\n")
+            } else {
+                textList.add("</p>")
+                textList[map["\n\n"]!!] = "<p>"
+                map["\n\n"] = textList.size
+                textList.add("\n\n")
+            }
+        } else i += 1
+        if (i < text.length) currentString += text[i]
+    }
+    if (map["\n\n"]!! != null) textList.add("</p>")
+    textList.add("</body></html>")
+    val res = textList.joinToString(separator = "")
+    println(res)
+    File(outputName).bufferedWriter().use { res }
 }
 
 /**
