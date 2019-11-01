@@ -368,7 +368,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
         if (text[i] == mark[0]) {
             if (mark.length == 2) if (i < text.length - 1 && text[i + 1] == mark[1]) i += 1 else return false
-            if (mark == "\n\n") while (i < text.length && text[i + 1] == '\n') i += 1
+            if (mark == "\n\n") while (i < text.length - 1 && text[i + 1] == '\n') i += 1
             if (currentString.isNotEmpty()) textList.add(currentString)
             currentString = ""
             if (map[mark] == null) {
