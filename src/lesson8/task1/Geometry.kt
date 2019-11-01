@@ -111,15 +111,14 @@ data class Segment(val begin: Point, val end: Point) {
  * Если в множестве менее двух точек, бросить IllegalArgumentException
  */
 fun diameter(vararg points: Point): Segment {
-    val p = points.toList()
-    require(p.size >= 2)
-    var longestSegment = Segment(p[0], p[1])
-    var longestDistance = p[0].distance(p[1])
-    for (i in 0..p.size - 2)
-        for (j in i + 1 until p.size) {
-            val d = p[i].distance(p[j])
+    require(points.size >= 2)
+    var longestSegment = Segment(points[0], points[1])
+    var longestDistance = points[0].distance(points[1])
+    for (i in 0..points.size - 2)
+        for (j in i + 1 until points.size) {
+            val d = points[i].distance(points[j])
             if (d >= longestDistance) {
-                longestSegment = Segment(p[i], p[j])
+                longestSegment = Segment(points[i], points[j])
                 longestDistance = d
             }
         }
@@ -177,29 +176,21 @@ class Line private constructor(val b: Double, val angle: Double) {
     override fun toString() = "Line(${cos(angle)} * y = ${sin(angle)} * x + $b)"
 }
 
-fun cosLine(a: Point, b: Point): Double {
-    var res = abs(a.x - b.x) / a.distance(b)
-    if (a.x < b.x) {
-        if (a.y > b.y) res *= -1
-    } else {
-        if (b.y > a.y) res *= -1
-    }
-    return res
-}
-
 /**
  * Средняя
  *
  * Построить прямую по отрезку
  */
-fun lineBySegment(s: Segment): Line = Line(s.begin, kotlin.math.acos(cosLine(s.begin, s.end)))
+fun angleByPoints(a: Point, b: Point): Double = abs((kotlin.math.atan((a.y - b.y) / (a.x - b.x)) + PI) % PI)
+
+fun lineBySegment(s: Segment): Line = Line(s.begin, angleByPoints(s.begin, s.end))
 
 /**
  * Средняя
  *
  * Построить прямую по двум точкам
  */
-fun lineByPoints(a: Point, b: Point): Line = Line
+fun lineByPoints(a: Point, b: Point): Line = lineBySegment(Segment(a, b))
 
 /**
  * Сложная
@@ -207,7 +198,7 @@ fun lineByPoints(a: Point, b: Point): Line = Line
  * Построить серединный перпендикуляр по отрезку или по двум точкам
  */
 fun bisectorByPoints(a: Point, b: Point): Line =
-    Line(Point((a.x + b.x) / 2, (a.y + b.y) / 2), (kotlin.math.acos(cosLine(a, b)) + PI / 2) % PI)
+    Line(Point((a.x + b.x) / 2, (a.y + b.y) / 2), ((angleByPoints(a, b) + PI / 2) % PI))
 
 /**
  * Средняя
@@ -256,13 +247,5 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
  * соединяющий две самые удалённые точки в данном множестве.
  */
 fun minContainingCircle(vararg points: Point): Circle {
-    val p = points.toList()
-    require(p.isNotEmpty())
-    if (p.size == 1) return Circle(p[0], 0.0)
-    val d = diameter(*points)
-    for (point in p) if (point != d.begin && point != d.end && point.distance(d.begin) == point.distance(d.end) &&
-        point.distance(d.begin) == d.begin.distance(d.end)
-    )
-        return circleByThreePoints(d.begin, d.end, point)
-    return circleByDiameter(diameter(*points))
+    TODO()
 }

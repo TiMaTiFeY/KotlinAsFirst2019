@@ -390,7 +390,6 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     text = File(inputName).readText().replace("\r", "")
     textList = mutableListOf("<html><body>", "<p>")
     map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
-    var text = ""
     currentString = ""
     i = 0
     while (i < text.length) {
@@ -410,6 +409,7 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     }
     textList.add("</body></html>")
     val res = textList.joinToString(separator = "")
+    println(res)
     File(outputName).bufferedWriter().use { it.write(res) }
 }
 
