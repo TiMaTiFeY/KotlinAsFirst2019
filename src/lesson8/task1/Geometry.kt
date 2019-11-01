@@ -133,7 +133,7 @@ fun diameter(vararg points: Point): Segment {
  */
 fun circleByDiameter(diameter: Segment): Circle {
     val center = Point((diameter.begin.x + diameter.end.x) / 2, (diameter.begin.y + diameter.end.y) / 2)
-    val radius = center.distance(diameter.begin)
+    val radius = diameter.begin.distance(diameter.end) / 2
     return Circle(center, radius)
 }
 
@@ -181,7 +181,8 @@ class Line private constructor(val b: Double, val angle: Double) {
  *
  * Построить прямую по отрезку
  */
-fun angleByPoints(a: Point, b: Point): Double = abs((kotlin.math.atan((a.y - b.y) / (a.x - b.x)) + PI) % PI)
+fun angleByPoints(a: Point, b: Point): Double =
+    if (a.x == b.x) PI / 2 else abs((kotlin.math.atan((a.y - b.y) / (a.x - b.x)) + PI) % PI)
 
 fun lineBySegment(s: Segment): Line = Line(s.begin, angleByPoints(s.begin, s.end))
 
@@ -248,18 +249,6 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
  * три точки данного множества, либо иметь своим диаметром отрезок,
  * соединяющий две самые удалённые точки в данном множестве.
  */
-fun randomPerm(list: List<Point>): List<Point> {
-    val newList = mutableListOf<Point>()
-    val setIndexes = list.indices.toMutableSet()
-    var randomIndex: Int
-    for (i in list.indices) {
-        randomIndex = setIndexes.random()
-        setIndexes -= randomIndex
-        newList.add(list[randomIndex])
-    }
-    return newList
-}
-
 fun minCircleWith2Point(p: List<Point>, newPoint1: Point, newPoint2: Point): Circle {
     var minCircle = circleByDiameter(Segment(newPoint1, newPoint2))
     for (point in p) if (!minCircle.contains(point)) minCircle = circleByThreePoints(point, newPoint1, newPoint2)
@@ -268,17 +257,16 @@ fun minCircleWith2Point(p: List<Point>, newPoint1: Point, newPoint2: Point): Cir
 
 fun minCircleWith1Point(p: List<Point>, newPoint: Point): Circle {
     var minCircle = circleByDiameter(Segment(p[0], newPoint))
-    for (i in 1 until p.size)
-        if (!minCircle.contains(p[i])) minCircle = minCircleWith2Point(p.subList(0, i), newPoint, p[i])
+    for (i in 1 until p.size) if (!minCircle.contains(p[i])) minCircle = minCircleWith2Point(p.take(i), newPoint, p[i])
     return minCircle
 }
 
 fun minContainingCircle(vararg points: Point): Circle {
     require(points.isNotEmpty())
     if (points.size == 1) return Circle(points[0], 0.0)
-    val p = randomPerm(points.toList())
+    val p = points.toList().shuffled()
     var minCircle = circleByDiameter(Segment(p[0], p[1]))
     for (i in 2 until p.size)
-        if (!minCircle.contains(p[i])) minCircle = minCircleWith1Point(randomPerm(p.subList(0, i)), p[i])
+        if (!minCircle.contains(p[i])) minCircle = minCircleWith1Point(p.take(i).shuffled(), p[i])
     return minCircle
 }
