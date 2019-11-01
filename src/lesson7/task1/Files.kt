@@ -358,8 +358,8 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
-var textList = mutableListOf("<html><body>", "<p>")
-var map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+var textList = mutableListOf<String>()
+var map = mutableMapOf<String, Int?>("**" to null, "*" to null, "~~" to null)
 var currentString = ""
 var i = 0
 var text = ""
@@ -376,10 +376,6 @@ fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
             textList.add(tags.second)
             textList[map[mark]!!] = tags.first
             map[mark] = null
-            if (mark == "\n\n") {
-                map[mark] = textList.size
-                textList.add("")
-            }
         }
         return true
     }
@@ -388,8 +384,8 @@ fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
 
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     text = File(inputName).readText().replace("\r", "")
-    textList = mutableListOf("<html><body>", "<p>")
-    map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+    textList = mutableListOf()
+    map = mutableMapOf("**" to null, "*" to null, "~~" to null)
     currentString = ""
     i = 0
     while (i < text.length) {
@@ -397,19 +393,15 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         flag =  flag || checkMarkToHTML("**", "<b>" to "</b>")
         if (!flag) flag = flag || checkMarkToHTML("*", "<i>" to "</i>")
         if (!flag) flag = flag || checkMarkToHTML("~~", "<s>" to "</s>")
-        if (!flag) flag = flag || checkMarkToHTML("\n\n", "<p>" to "</p>")
         if (i < text.length && !flag) currentString += text[i]
         i += 1
     }
     textList.add(currentString)
-    val lastP = map["\n\n"]
-    if (lastP != null) {
-        textList[lastP] = "<p>"
-        textList.add("</p>")
-    }
-    textList.add("</body></html>")
-    val res = textList.joinToString(separator = "")
-    println(res)
+    val str = textList.joinToString(separator = "").split("\n\n").filter { it.isNotEmpty() }
+    var res = "<html><body>"
+    for (el in str)
+        res += "<p>$el</p>"
+    res += "</body></html>"
     File(outputName).bufferedWriter().use { it.write(res) }
 }
 
