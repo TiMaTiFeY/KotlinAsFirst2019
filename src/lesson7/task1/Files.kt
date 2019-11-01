@@ -359,7 +359,7 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
  */
 var textList = mutableListOf("<html><body>", "<p>")
-val map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+var map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
 var currentString = ""
 var i = 0
 var text = ""
@@ -388,14 +388,17 @@ fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
 
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
     text = File(inputName).readText().replace("\r", "")
+    textList = mutableListOf("<html><body>", "<p>")
+    map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
+    var text = ""
     currentString = ""
     i = 0
     while (i < text.length) {
         var flag = false
         flag =  flag || checkMarkToHTML("**", "<b>" to "</b>")
-        if (!flag) flag =  flag || checkMarkToHTML("*", "<i>" to "</i>")
-        if (!flag) flag =  flag || checkMarkToHTML("~~", "<s>" to "</s>")
-        if (!flag) flag =  flag || checkMarkToHTML("\n\n", "<p>" to "</p>")
+        if (!flag) flag = flag || checkMarkToHTML("*", "<i>" to "</i>")
+        if (!flag) flag = flag || checkMarkToHTML("~~", "<s>" to "</s>")
+        if (!flag) flag = flag || checkMarkToHTML("\n\n", "<p>" to "</p>")
         if (i < text.length && !flag) currentString += text[i]
         i += 1
     }

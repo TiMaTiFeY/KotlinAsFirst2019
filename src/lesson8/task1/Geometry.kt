@@ -116,11 +116,13 @@ fun diameter(vararg points: Point): Segment {
     var longestSegment = Segment(p[0], p[1])
     var longestDistance = p[0].distance(p[1])
     for (i in 0..p.size - 2)
-        for (j in i + 1 until p.size)
-            if (p[i].distance(p[j]) >= longestDistance) {
+        for (j in i + 1 until p.size) {
+            val d = p[i].distance(p[j])
+            if (d >= longestDistance) {
                 longestSegment = Segment(p[i], p[j])
-                longestDistance = p[i].distance(p[j])
+                longestDistance = d
             }
+        }
     return longestSegment
 }
 
@@ -157,7 +159,10 @@ class Line private constructor(val b: Double, val angle: Double) {
      */
     fun crossPoint(other: Line): Point {
         val x = (b * cos(other.angle) - other.b * cos(angle)) / sin(other.angle - angle)
-        val y = (x * sin(other.angle) + other.b) / cos(other.angle)
+        val dif1 = abs(other.angle - PI / 2)
+        val dif2 = abs(angle - PI / 2)
+        val y = if (dif1 >= dif2) (x * sin(other.angle) + other.b) / cos(other.angle)
+        else (x * sin(angle) + b) / cos(angle)
         return Point(x, y)
     }
 
@@ -194,7 +199,7 @@ fun lineBySegment(s: Segment): Line = Line(s.begin, kotlin.math.acos(cosLine(s.b
  *
  * Построить прямую по двум точкам
  */
-fun lineByPoints(a: Point, b: Point): Line = Line(a, kotlin.math.acos(cosLine(a, b)))
+fun lineByPoints(a: Point, b: Point): Line = Line
 
 /**
  * Сложная
@@ -256,7 +261,8 @@ fun minContainingCircle(vararg points: Point): Circle {
     if (p.size == 1) return Circle(p[0], 0.0)
     val d = diameter(*points)
     for (point in p) if (point != d.begin && point != d.end && point.distance(d.begin) == point.distance(d.end) &&
-            point.distance(d.begin) == d.begin.distance(d.end))
+        point.distance(d.begin) == d.begin.distance(d.end)
+    )
         return circleByThreePoints(d.begin, d.end, point)
     return circleByDiameter(diameter(*points))
 }
