@@ -360,7 +360,7 @@ Suspendisse <s>et elit in enim tempus iaculis</s>.
  */
 
 fun markdownToHtmlSimple(inputName: String, outputName: String) {
-    val text = File(inputName).readText().replace("\r", "")
+    val text = File(inputName).readText().replace("\r", "").trim('\n')
     val textList = mutableListOf("<html><body>", "<p>")
     val map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
     var currentString = ""
