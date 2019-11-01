@@ -210,13 +210,15 @@ fun findNearestCirclePair(vararg circles: Circle): Pair<Circle, Circle> {
     val p = circles.toList()
     require(p.size >= 2)
     var resCircles = Pair(p[0], p[1])
-    var shorterDistance = p[0].distance(p[1])
+    var shortestDistance = p[0].distance(p[1])
     for (i in 0..p.size - 2)
-        for (j in i + 1 until p.size)
-            if (p[i].distance(p[j]) < shorterDistance) {
+        for (j in i + 1 until p.size) {
+            val d = p[i].distance(p[j])
+            if (d < shortestDistance) {
                 resCircles = Pair(p[i], p[j])
-                shorterDistance = p[i].distance(p[j])
+                shortestDistance = d
             }
+        }
     return resCircles
 }
 
@@ -246,6 +248,37 @@ fun circleByThreePoints(a: Point, b: Point, c: Point): Circle {
  * три точки данного множества, либо иметь своим диаметром отрезок,
  * соединяющий две самые удалённые точки в данном множестве.
  */
+fun randomPerm(list: List<Point>): List<Point> {
+    val newList = mutableListOf<Point>()
+    val setIndexes = list.indices.toMutableSet()
+    var randomIndex: Int
+    for (i in list.indices) {
+        randomIndex = setIndexes.random()
+        setIndexes -= randomIndex
+        newList.add(list[randomIndex])
+    }
+    return newList
+}
+
+fun minCircleWith2Point(p: List<Point>, newPoint1: Point, newPoint2: Point): Circle {
+    var minCircle = circleByDiameter(Segment(newPoint1, newPoint2))
+    for (point in p) if (!minCircle.contains(point)) minCircle = circleByThreePoints(point, newPoint1, newPoint2)
+    return minCircle
+}
+
+fun minCircleWith1Point(p: List<Point>, newPoint: Point): Circle {
+    var minCircle = circleByDiameter(Segment(p[0], newPoint))
+    for (i in 1 until p.size)
+        if (!minCircle.contains(p[i])) minCircle = minCircleWith2Point(p.subList(0, i), newPoint, p[i])
+    return minCircle
+}
+
 fun minContainingCircle(vararg points: Point): Circle {
-    TODO()
+    require(points.isNotEmpty())
+    if (points.size == 1) return Circle(points[0], 0.0)
+    val p = randomPerm(points.toList())
+    var minCircle = circleByDiameter(Segment(p[0], p[1]))
+    for (i in 2 until p.size)
+        if (!minCircle.contains(p[i])) minCircle = minCircleWith1Point(randomPerm(p.subList(0, i)), p[i])
+    return minCircle
 }
