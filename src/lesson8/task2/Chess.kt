@@ -27,7 +27,7 @@ data class Square(val column: Int, val row: Int) {
      * В нотации, колонки обозначаются латинскими буквами от a до h, а ряды -- цифрами от 1 до 8.
      * Для клетки не в пределах доски вернуть пустую строку
      */
-    fun notation(): String = if (inside()) "${(column + 96).toChar()}$row" else ""
+    fun notation(): String = if (inside()) "${(column + 'a'.toInt() - 1).toChar()}$row" else ""
 }
 
 /**
@@ -42,7 +42,7 @@ fun square(notation: String): Square {
     val column = notation[0]
     val row = notation[1]
     require(column in 'a'..'h' && row in '1'..'8')
-    return Square(column - 'a' + 1, row.toInt() - 48)
+    return Square(column - 'a' + 1, row.toInt() - '1'.toInt() + 1)
 }
 
 /**
@@ -70,8 +70,11 @@ fun square(notation: String): Square {
  */
 fun rookMoveNumber(start: Square, end: Square): Int {
     require(start.inside() && end.inside())
-    return if (start == end) 0
-    else if (start.column == end.column || start.row == end.row) 1 else 2
+    return when {
+        start == end -> 0
+        start.column == end.column || start.row == end.row -> 1
+        else -> 2
+    }
 }
 
 /**
@@ -207,8 +210,7 @@ fun kingMoveNumber(start: Square, end: Square): Int {
     require(start.inside() && end.inside())
     val dx = abs(start.column - end.column)
     val dy = abs(start.row - end.row)
-    return if (start == end) 0
-    else kotlin.math.min(dx, dy) + abs(dy - dx)
+    return kotlin.math.max(dx, dy)
 }
 
 /**
@@ -287,8 +289,10 @@ fun knightMoveNumber(start: Square, end: Square): Int = knightTrajectory(start, 
 fun knightTrajectory(start: Square, end: Square): List<Square> {
     require(start.inside() && end.inside())
     //Воспользуемся поиском в ширину, с восстановлением пути по хеш-таблице
-    val kndX = listOf(2, 2, 1, -1, -2, -2, -1, 1)
-    val kndY = listOf(1, -1, -2, -2, -1, 1, 2, 2)
+    val knightMoves = listOf(
+        2 to 1, 2 to -1, 1 to -2, -1 to -2,
+        -2 to -1, -2 to 1, -1 to 2, 1 to 2
+    )
     val visited = mutableSetOf(start)
     val queue = mutableListOf(start)
     val previewSquare = mutableMapOf(start to Square(-1, -1))
@@ -297,8 +301,8 @@ fun knightTrajectory(start: Square, end: Square): List<Square> {
         if (currentSquare == end) break
         visited += currentSquare
         queue.remove(currentSquare)
-        for (i in 0 until 8) {
-            val nextSquare = Square(currentSquare.column + kndX[i], currentSquare.row + kndY[i])
+        for ((dX, dY) in knightMoves) {
+            val nextSquare = Square(currentSquare.column + dX, currentSquare.row + dY)
             if (nextSquare.inside() && nextSquare !in visited) {
                 queue.add(nextSquare)
                 previewSquare[nextSquare] = currentSquare

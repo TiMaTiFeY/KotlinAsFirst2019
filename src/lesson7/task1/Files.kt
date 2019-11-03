@@ -363,14 +363,16 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
     val text = File(inputName).readText().replace("\r", "").trim('\n')
     val textList = mutableListOf("<html><body>", "<p>")
     val map = mutableMapOf("**" to null, "*" to null, "~~" to null, "\n\n" to 1)
-    var currentString = ""
+    var indexOfBeginString = 0
     var i = 0
     fun checkMarkToHTML(mark: String, tags: Pair<String, String>): Boolean {
         if (text[i] == mark[0]) {
-            if (mark.length == 2) if (i < text.length - 1 && text[i + 1] == mark[1]) i += 1 else return false
-            if (mark == "\n\n") while (i < text.length - 1 && text[i + 1] == '\n') i += 1
-            if (currentString.isNotEmpty()) textList.add(currentString)
-            currentString = ""
+            var di = i
+            if (mark.length == 2) if (di < text.length - 1 && text[di + 1] == mark[1]) di += 1 else return false
+            if (mark == "\n\n") while (di < text.length - 1 && text[di + 1] == '\n') di += 1
+            if (i - indexOfBeginString != 0) textList.add(text.substring(indexOfBeginString, i))
+            i = di
+            indexOfBeginString = i + 1
             if (map[mark] == null) {
                 map[mark] = textList.size
                 textList.add(mark)
@@ -388,14 +390,13 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         return false
     }
     while (i < text.length) {
-        var flag =  checkMarkToHTML("**", "<b>" to "</b>")
+        var flag = checkMarkToHTML("**", "<b>" to "</b>")
         if (!flag) flag = checkMarkToHTML("*", "<i>" to "</i>")
         if (!flag) flag = checkMarkToHTML("~~", "<s>" to "</s>")
-        if (!flag) flag = checkMarkToHTML("\n\n", "<p>" to "</p>")
-        if (i < text.length && !flag) currentString += text[i]
+        if (!flag) checkMarkToHTML("\n\n", "<p>" to "</p>")
         i += 1
     }
-    textList.add(currentString)
+    textList.add(text.substring(indexOfBeginString, i))
     val lastP = map["\n\n"]
     if (lastP != null) {
         textList[lastP] = "<p>"
