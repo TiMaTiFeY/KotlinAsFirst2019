@@ -165,7 +165,7 @@ fun solve(x1: Int, y1: Int, x2: Int, y2: Int, needSwap: Boolean = false): Square
     val p = quadraticEquationRoot(a.toDouble(), b.toDouble(), c.toDouble())
     //Выбираем нужный результат
     val x = if (p.first in 1..8) p.first else p.second
-    val y = x * dx / dy + (dy * sy - dx * sx) / (2 * dy)
+    val y = (2 * x * dx + dy * sy - dx * sx) / (2 * dy)
     return if (!needSwap) Square(x, y) else Square(y, x)
 }
 
