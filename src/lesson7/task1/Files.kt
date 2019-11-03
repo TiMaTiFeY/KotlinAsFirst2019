@@ -388,11 +388,10 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
         return false
     }
     while (i < text.length) {
-        var flag = false
-        flag =  flag || checkMarkToHTML("**", "<b>" to "</b>")
-        if (!flag) flag = flag || checkMarkToHTML("*", "<i>" to "</i>")
-        if (!flag) flag = flag || checkMarkToHTML("~~", "<s>" to "</s>")
-        if (!flag) flag = flag || checkMarkToHTML("\n\n", "<p>" to "</p>")
+        var flag =  checkMarkToHTML("**", "<b>" to "</b>")
+        if (!flag) flag = checkMarkToHTML("*", "<i>" to "</i>")
+        if (!flag) flag = checkMarkToHTML("~~", "<s>" to "</s>")
+        if (!flag) flag = checkMarkToHTML("\n\n", "<p>" to "</p>")
         if (i < text.length && !flag) currentString += text[i]
         i += 1
     }

@@ -1,7 +1,7 @@
 @file:Suppress("UNUSED_PARAMETER")
 
 package lesson8.task1
-
+import kotlin.math.abs
 /**
  * Точка (гекс) на шестиугольной сетке.
  * Координаты заданы как в примере (первая цифра - y, вторая цифра - x)
@@ -28,7 +28,12 @@ package lesson8.task1
  * Более подробно про шестиугольные системы координат можно почитать по следующей ссылке:
  *   https://www.redblobgames.com/grids/hexagons/
  */
+data class Cube(val x: Int, val y: Int, val z: Int) {
+    fun toAxial(): HexPoint = HexPoint(x, y)
+}
+
 data class HexPoint(val x: Int, val y: Int) {
+    fun toCube(): Cube = Cube(x, y, -x-y)
     /**
      * Средняя
      *
@@ -36,7 +41,7 @@ data class HexPoint(val x: Int, val y: Int) {
      * Расстояние вычисляется как число единичных отрезков в пути между двумя гексами.
      * Например, путь межу гексами 16 и 41 (см. выше) может проходить через 25, 34, 43 и 42 и имеет длину 5.
      */
-    fun distance(other: HexPoint): Int = TODO()
+    fun distance(other: HexPoint): Int = (abs(x - other.x) + abs(x + y - other.x - other.y) + abs(y - other.y)) / 2
 
     override fun toString(): String = "$y.$x"
 }
@@ -206,5 +211,7 @@ fun hexagonByThreePoints(a: HexPoint, b: HexPoint, c: HexPoint): Hexagon? = TODO
  */
 fun minContainingHexagon(vararg points: HexPoint): Hexagon = TODO()
 
-
+fun main() {
+    println(HexPoint(3, 3).distance(HexPoint(5, 4)))
+}
 
