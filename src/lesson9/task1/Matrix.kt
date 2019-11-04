@@ -2,8 +2,6 @@
 
 package lesson9.task1
 
-import java.lang.StringBuilder
-
 /**
  * Ячейка матрицы: row = ряд, column = колонка
  */
@@ -51,25 +49,21 @@ fun <E> createMatrix(height: Int, width: Int, e: E): Matrix<E> = MatrixImpl(heig
  * Реализация интерфейса "матрица"
  */
 class MatrixImpl<E>(override val height: Int, override val width: Int, e: E) : Matrix<E> {
-    private var dataMatrix = mutableListOf<MutableList<E>>()
-    private var maxValueLength: Int
+    private val dataMatrix = List(height) { MutableList(width) { e } }
+    private var maxValueLength = e.toString().length
 
     init {
         require(height > 0 && width > 0)
-        for (i in 0 until height) {
-            val currentRow = mutableListOf<E>()
-            for (j in 0 until width) currentRow.add(e)
-            dataMatrix.add(currentRow)
-        }
-        maxValueLength = e.toString().length
     }
 
-    override fun get(row: Int, column: Int): E = dataMatrix[row][column] ?: throw IllegalArgumentException()
+    private fun checkIn(row: Int, column: Int): Boolean = row in 0 until height && column in 0 until width
+    override fun get(row: Int, column: Int): E =
+        if (checkIn(row, column)) dataMatrix[row][column] else throw IllegalArgumentException()
 
     override fun get(cell: Cell): E = get(cell.row, cell.column)
 
     override fun set(row: Int, column: Int, value: E) {
-        require(row in 0 until height && column in 0 until width)
+        require(checkIn(row, column))
         dataMatrix[row][column] = value
         val len = value.toString().length
         if (maxValueLength < len) maxValueLength = len
@@ -82,26 +76,18 @@ class MatrixImpl<E>(override val height: Int, override val width: Int, e: E) : M
             width == other.width &&
             dataMatrix == other.dataMatrix
 
-    override fun toString(): String {
-        val sb = StringBuilder()
-        sb.append("[")
-        for (row in 0 until height) {
-            if (row == 0) sb.append("[") else sb.append(" [")
-            for (column in 0 until width)
-                if (row == height - 1)
-                    if (column == width - 1) sb.append(String.format("%${maxValueLength}s]", this[row, width - 1]))
-                    else sb.append(String.format("%${maxValueLength}s, ", this[row, column]))
-                else
-                    if (column == width - 1) sb.append(String.format("%${maxValueLength}s],\n", this[row, width - 1]))
-                    else sb.append(String.format("%${maxValueLength}s, ", this[row, column]))
+    override fun toString(): String =
+        dataMatrix.joinToString(
+            prefix = "{Matrix h=${height}, w=${width}:\n",
+            separator = ",\n",
+            postfix = "}"
+        ) {
+            it.joinToString(
+                prefix = " [",
+                separator = ", ",
+                postfix = "]"
+            ) { it2 -> String.format("%${maxValueLength}s", it2) }
         }
-        sb.append("]")
-        return "$sb"
-    }
 
-    override fun hashCode(): Int {
-        var result = height
-        result = 31 * result + width
-        return result
-    }
+    override fun hashCode() = dataMatrix.hashCode()
 }
