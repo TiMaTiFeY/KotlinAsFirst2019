@@ -5,7 +5,6 @@ package lesson9.task2
 import lesson9.task1.Matrix
 import lesson9.task1.MatrixImpl
 import lesson9.task1.createMatrix
-import ru.spbstu.wheels.sorted
 
 // Все задачи в этом файле требуют наличия реализации интерфейса "Матрица" в Matrix.kt
 
@@ -64,11 +63,11 @@ operator fun Matrix<Int>.plus(other: Matrix<Int>): Matrix<Int> {
  */
 fun generateSpiral(height: Int, width: Int): Matrix<Int> {
     val moves = listOf(0 to 1, 1 to 0, 0 to -1, -1 to 0) //dRow to dColumn
-    var moveNumber = 0
     val matrix = MatrixImpl(height, width, 0)
     var (i, j) = 0 to 0
     var (minJ, maxJ) = 0 to width - 1
     var (minI, maxI) = 1 to height - 1
+    var moveNumber = if (width == 1) 1 else 0
     for (n in 1..height * width) {
         matrix[i, j] = n
         i += moves[moveNumber].first
@@ -161,7 +160,7 @@ fun generateSnake(height: Int, width: Int): Matrix<Int> {
     val matrix = MatrixImpl(height, width, 0)
     var (i, j) = 0 to 0
     var minJ = 0
-    var (nextI, nextJ) = 0 to 1
+    var (nextI, nextJ) = if (width != 1) 0 to 1 else 1 to 0
     for (n in 1..height * width) {
         matrix[i, j] = n
         when {
@@ -378,7 +377,7 @@ fun canOpenLock(key: Matrix<Int>, lock: Matrix<Int>): Triple<Boolean, Int, Int> 
  */
 operator fun Matrix<Int>.unaryMinus(): Matrix<Int> {
     for (i in 0 until this.height)
-        for (j in 0 until  this.width)
+        for (j in 0 until this.width)
             this[i, j] *= -1
     return this
 }
