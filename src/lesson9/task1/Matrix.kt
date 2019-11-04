@@ -2,6 +2,8 @@
 
 package lesson9.task1
 
+import java.lang.StringBuilder
+
 /**
  * Ячейка матрицы: row = ряд, column = колонка
  */
@@ -41,32 +43,65 @@ interface Matrix<E> {
  * height = высота, width = ширина, e = чем заполнить элементы.
  * Бросить исключение IllegalArgumentException, если height или width <= 0.
  */
-fun <E> createMatrix(height: Int, width: Int, e: E): Matrix<E> = TODO()
+fun <E> createMatrix(height: Int, width: Int, e: E): Matrix<E> = MatrixImpl(height, width, e)
 
 /**
  * Средняя сложность
  *
  * Реализация интерфейса "матрица"
  */
-class MatrixImpl<E> : Matrix<E> {
-    override val height: Int = TODO()
+class MatrixImpl<E>(override val height: Int, override val width: Int, e: E) : Matrix<E> {
+    private var dataMatrix = mutableListOf<MutableList<E>>()
+    private var maxValueLength: Int
 
-    override val width: Int = TODO()
+    init {
+        require(height > 0 && width > 0)
+        for (i in 0 until height) {
+            val currentRow = mutableListOf<E>()
+            for (j in 0 until width) currentRow.add(e)
+            dataMatrix.add(currentRow)
+        }
+        maxValueLength = e.toString().length
+    }
 
-    override fun get(row: Int, column: Int): E = TODO()
+    override fun get(row: Int, column: Int): E = dataMatrix[row][column] ?: throw IllegalArgumentException()
 
-    override fun get(cell: Cell): E = TODO()
+    override fun get(cell: Cell): E = get(cell.row, cell.column)
 
     override fun set(row: Int, column: Int, value: E) {
-        TODO()
+        require(row in 0 until height && column in 0 until width)
+        dataMatrix[row][column] = value
+        val len = value.toString().length
+        if (maxValueLength < len) maxValueLength = len
     }
 
-    override fun set(cell: Cell, value: E) {
-        TODO()
+    override fun set(cell: Cell, value: E) = set(cell.row, cell.column, value)
+
+    override fun equals(other: Any?) = other is MatrixImpl<*> &&
+            height == other.height &&
+            width == other.width &&
+            dataMatrix == other.dataMatrix
+
+    override fun toString(): String {
+        val sb = StringBuilder()
+        sb.append("[")
+        for (row in 0 until height) {
+            if (row == 0) sb.append("[") else sb.append(" [")
+            for (column in 0 until width)
+                if (row == height - 1)
+                    if (column == width - 1) sb.append(String.format("%${maxValueLength}s]", this[row, width - 1]))
+                    else sb.append(String.format("%${maxValueLength}s, ", this[row, column]))
+                else
+                    if (column == width - 1) sb.append(String.format("%${maxValueLength}s],\n", this[row, width - 1]))
+                    else sb.append(String.format("%${maxValueLength}s, ", this[row, column]))
+        }
+        sb.append("]")
+        return "$sb"
     }
 
-    override fun equals(other: Any?) = TODO()
-
-    override fun toString(): String = TODO()
+    override fun hashCode(): Int {
+        var result = height
+        result = 31 * result + width
+        return result
+    }
 }
-
