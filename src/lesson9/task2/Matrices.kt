@@ -262,21 +262,13 @@ fun sumNeighbours(matrix: Matrix<Int>): Matrix<Int> {
  */
 fun findHoles(matrix: Matrix<Int>): Holes {
     val (rows, columns) = mutableListOf<Int>() to mutableListOf<Int>()
-    for (i in 0 until matrix.height) {
-        var flag = true
-        for (j in 0 until matrix.width) if (matrix[i, j] == 1) {
-            flag = false
-            break
-        }
-        if (flag) rows.add(i)
+    loopRows@ for (i in 0 until matrix.height) {
+        for (j in 0 until matrix.width) if (matrix[i, j] == 1) continue@loopRows
+        rows.add(i)
     }
-    for (j in 0 until matrix.width) {
-        var flag = true
-        for (i in 0 until matrix.height) if (matrix[i, j] == 1) {
-            flag = false
-            break
-        }
-        if (flag) columns.add(j)
+    loopColumns@ for (j in 0 until matrix.width) {
+        for (i in 0 until matrix.height) if (matrix[i, j] == 1) continue@loopColumns
+        columns.add(j)
     }
     return Holes(rows, columns)
 }
