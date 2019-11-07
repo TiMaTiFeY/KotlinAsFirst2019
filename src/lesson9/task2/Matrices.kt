@@ -3,6 +3,7 @@
 package lesson9.task2
 
 import lesson9.task1.Matrix
+import lesson9.task1.copy
 import lesson9.task1.createMatrix
 import kotlin.math.min
 import kotlin.math.abs
@@ -453,4 +454,71 @@ fun fifteenGameMoves(matrix: Matrix<Int>, moves: List<Int>): Matrix<Int> {
  *
  * Перед решением этой задачи НЕОБХОДИМО решить предыдущую
  */
-fun fifteenGameSolution(matrix: Matrix<Int>): List<Int> = TODO()
+
+fun Matrix<Int>.isSolve(): Boolean {
+    var n = 1
+    l@ for (i in 0..3)
+        for (j in 0..3) {
+            if (this[i, j] != n)
+                return false
+            n++
+            if (n == 14) break@l
+        }
+    if (this[3, 1] + this[3, 2] != 14 + 15) return false
+    return true
+}
+
+fun Pair<Int, Int>.isLegal(): Boolean = this.first in 0..3 && this.second in 0..3
+
+fun fifteenGameSolution(matrix: Matrix<Int>): List<Int> {
+    val visited = mutableSetOf(matrix)
+    val queue = mutableListOf(matrix)
+    val lastMatrix = createMatrix(4, 4, -1)
+    val previewMatrix = mutableMapOf(matrix to lastMatrix)
+    val mapNulls = mutableMapOf<Matrix<Int>, Pair<Int, Int>>()
+    val moves = listOf(-1 to 0, 0 to 1, 1 to 0, 0 to -1)
+    l@for (i in 0..3)
+        for (j in 0..3)
+            if (matrix[i, j] == 0) {
+                mapNulls[matrix] = i to j
+                break@l
+            }
+    var currentMatrix = matrix.copy()
+    while (queue.isNotEmpty()) {
+        currentMatrix = queue[0]
+        if (currentMatrix.isSolve()) break
+        queue.remove(currentMatrix)
+        val (iNull, jNull) = mapNulls[currentMatrix]!!
+        for ((dI, dJ) in moves) {
+            val new = Pair(iNull + dI, jNull + dJ)
+            if (new.isLegal()) {
+                val newMatrix = currentMatrix.copy()
+                newMatrix[iNull, jNull] = currentMatrix[new.first, new.second]
+                newMatrix[new.first, new.second] = 0
+                if (newMatrix !in visited) {
+                    queue.add(newMatrix)
+                    previewMatrix[newMatrix] = currentMatrix
+                    mapNulls[newMatrix] = new
+                    visited += newMatrix
+                }
+            }
+        }
+    }
+    val trajectory = mutableListOf<Matrix<Int>>()
+    var next = currentMatrix
+    while (next != lastMatrix) {
+        trajectory.add(0, next)
+        next = previewMatrix[next]!!
+    }
+    for (i in trajectory) println(i)
+    return listOf(1)
+}
+ fun main() {
+     val m = createMatrix(4, 4, 0)
+     val data = listOf(
+         listOf(1, 2, 3, 0), listOf(5, 6, 7, 8),
+         listOf(9, 10, 11, 12), listOf(13, 14, 15, 4))
+     for (i in 0..3)
+         for (j in 0..3) m[i, j] = data[i][j]
+     fifteenGameSolution(m)
+ }

@@ -32,6 +32,7 @@ interface Matrix<E> {
     operator fun set(row: Int, column: Int, value: E)
 
     operator fun set(cell: Cell, value: E)
+
 }
 
 /**
@@ -43,6 +44,13 @@ interface Matrix<E> {
  */
 fun <E> createMatrix(height: Int, width: Int, e: E): Matrix<E> = MatrixImpl(height, width, e)
 
+fun <E> Matrix<E>.copy(): Matrix<E> {
+    val new = createMatrix(this.height, this.width, this[0, 0])
+    for (i in 0 until this.height)
+        for (j in 0 until this.height)
+            new[i, j] = this[i, j]
+    return new
+}
 /**
  * Средняя сложность
  *
